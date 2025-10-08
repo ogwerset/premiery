@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Workflow Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+
+        #main-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        #svg-container {
+            flex: 1;
+            position: relative;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        #svg-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+
+        #svg-wrapper svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 400px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            padding: 0;
+            overflow-y: auto;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+            position: relative;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebar-content {
+            padding: 24px;
+        }
+
+        .sidebar-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #1a1a1a;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1BA1E2;
+            box-shadow: 0 0 0 3px rgba(27, 161, 226, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .links-list, .files-list {
+            list-style: none;
+            margin-top: 8px;
+        }
+
+        .link-item, .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .link-item a {
+            color: #1BA1E2;
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .file-item span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #1BA1E2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1589C9;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .add-link-form, .add-file-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .add-link-form input, .add-file-form input {
+            flex: 1;
+        }
+
+        /* Top toolbar */
+        .toolbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toolbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        #zoom-level {
+            padding: 4px 8px;
+            font-size: 13px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .zoom-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.15s;
+        }
+
+        .zoom-btn:hover {
+            background: #e9ecef;
+            color: #1a1a1a;
+        }
+
+        #toggle-sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toggle-sidebar-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 12px;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Info banner */
+        .info-banner {
+            position: absolute;
+            top: 72px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            z-index: 99;
+            max-width: 280px;
+            transition: all 0.3s;
+        }
+
+        .info-banner.hidden {
+            transform: translateX(320px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .info-banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .info-banner h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .info-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .info-close:hover {
+            color: #333;
+        }
+
+        .info-banner p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .info-banner p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Clickable nodes */
+        #svg-wrapper svg g[id] {
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        #svg-wrapper svg g[id]:hover {
+            opacity: 0.85;
+        }
+
+        /* Content area with toolbar offset */
+        #content-wrapper {
+            position: absolute;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Loading state */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #1BA1E2;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="svg-container">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="toolbar-title">Workflow Diagram</div>
+                    <span style="font-size: 12px; color: #999; margin-left: 8px;">v1.0.0</span>
+                </div>
+                <div class="toolbar-right">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()" title="Zoom out (-)">−</button>
+                        <div id="zoom-level">100%</div>
+                        <button class="zoom-btn" onclick="zoomIn()" title="Zoom in (+)">+</button>
+                        <button class="btn btn-secondary btn-small" onclick="resetZoom()" title="Reset view (0)">Reset</button>
+                    </div>
+                    <button class="btn btn-primary btn-small" id="toggle-sidebar-btn" onclick="toggleSidebar()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span>Node Details</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-banner" id="info-banner">
+                <div class="info-banner-header">
+                    <h3>Quick Guide</h3>
+                    <button class="info-close" onclick="closeInfoBanner()">&times;</button>
+                </div>
+                <p>🖱️ Click any node to view/edit details</p>
+                <p>🔍 Scroll to zoom in and out</p>
+                <p>✋ Drag to pan around the diagram</p>
+            </div>
+
+            <div id="content-wrapper">
+                <div id="svg-wrapper">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading diagram...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sidebar">
+            <div id="sidebar-content">
+                <button class="close-btn" onclick="closeSidebar()">&times;</button>
+                <div class="sidebar-header">
+                    <h2 id="node-title">Select a Node</h2>
+                    <p id="node-id">Click any node on the diagram to edit</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="node-name">Node Name</label>
+                    <input type="text" id="node-name" placeholder="Enter node name">
+                </div>
+
+                <div class="form-group">
+                    <label for="node-description">Description</label>
+                    <textarea id="node-description" placeholder="Add a description for this node"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Attached Links</label>
+                    <ul class="links-list" id="links-list">
+                        <li class="empty-state">Select a node to add links</li>
+                    </ul>
+                    <div class="add-link-form">
+                        <input type="text" id="new-link-url" placeholder="https://example.com">
+                        <button class="btn btn-primary btn-small" onclick="addLink()">Add</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Attached Files</label>
+                    <ul class="files-list" id="files-list">
+                        <li class="empty-state">Select a node to add files</li>
+                    </ul>
+                    <div class="add-file-form">
+                        <input type="text" id="new-file-name" placeholder="document.pdf">
+                        <button class="btn btn-primary btn-small" onclick="addFile()">Add</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="saveNodeData()" style="flex: 1">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="closeSidebar()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let panZoomInstance = null;
+        let currentNodeId = null;
+        let nodeData = {};
+        let selectedElement = null;
+
+        // Load node data from localStorage
+        function loadNodeData() {
+            const saved = localStorage.getItem('workflowNodeData');
+            if (saved) {
+                nodeData = JSON.parse(saved);
+            }
+        }
+
+        // Save node data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('workflowNodeData', JSON.stringify(nodeData));
+        }
+
+        // Load and display SVG
+        async function loadSVG() {
+            try {
+                const response = await fetch('assets/flowchart-processed.svg');
+                const svgText = await response.text();
+                document.getElementById('svg-wrapper').innerHTML = svgText;
+
+                // Initialize pan-zoom after SVG is loaded
+                setTimeout(() => {
+                    const svgElement = document.querySelector('#svg-wrapper svg');
+                    if (svgElement) {
+                        panZoomInstance = svgPanZoom(svgElement, {
+                            zoomEnabled: true,
+                            controlIconsEnabled: false,
+                            fit: true,
+                            center: true,
+                            minZoom: 0.1,
+                            maxZoom: 5,
+                            zoomScaleSensitivity: 0.3,
+                            mouseWheelZoomEnabled: true
+                        });
+
+                        // Update zoom level display
+                        panZoomInstance.setOnZoom(function(level) {
+                            document.getElementById('zoom-level').textContent = Math.round(level * 100) + '%';
+                        });
+
+                        // Make nodes clickable
+                        makeNodesClickable();
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error loading SVG:', error);
+                document.getElementById('svg-wrapper').innerHTML =
+                    '<div style="text-align: center; padding: 40px; color: #666;"><p>Error loading diagram. Make sure you are viewing this through a web server.</p><p style="margin-top: 10px; font-size: 13px;">Run: <code>python3 -m http.server 8000</code></p></div>';
+            }
+        }
+
+        // Make all nodes clickable
+        function makeNodesClickable() {
+            const svgElement = document.querySelector('#svg-wrapper svg');
+            if (!svgElement) return;
+
+            const nodes = svgElement.querySelectorAll('g[id]');
+
+            nodes.forEach(node => {
+                const nodeId = node.getAttribute('id');
+                if (nodeId === '0' || nodeId === '1') return;
+
+                const hasContent = node.querySelector('rect, ellipse, path, text, image');
+                if (!hasContent) return;
+
+                node.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openNodeEditor(nodeId, node);
+                });
+            });
+        }
+
+        // Open node editor sidebar
+        function openNodeEditor(nodeId, element) {
+            currentNodeId = nodeId;
+            selectedElement = element;
+
+            // Get node text content
+            const textElement = element.querySelector('text');
+            const nodeText = textElement ? textElement.textContent.trim() : 'Unnamed Node';
+
+            // Load existing data or create new
+            if (!nodeData[nodeId]) {
+                nodeData[nodeId] = {
+                    name: nodeText,
+                    description: '',
+                    links: [],
+                    files: []
+                };
+            }
+
+            // Populate form
+            document.getElementById('node-title').textContent = nodeText;
+            document.getElementById('node-id').textContent = `Node ID: ${nodeId}`;
+            document.getElementById('node-name').value = nodeData[nodeId].name;
+            document.getElementById('node-description').value = nodeData[nodeId].description;
+
+            renderLinks();
+            renderFiles();
+
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('toggle-sidebar-btn').innerHTML = `
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <span>Close Panel</span>
+            `;
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                // Just open empty sidebar
+                document.getElementById('sidebar').classList.add('open');
+                document.getElementById('toggle-sidebar-btn').innerHTML = `
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Close Panel</span>
+                `;
+            }
+        }
+
+        // Close sidebar
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('toggle-sidebar-btn').innerHTML = `
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <span>Node Details</span>
+            `;
+            currentNodeId = null;
+            selectedElement = null;
+        }
+
+        // Close info banner
+        function closeInfoBanner() {
+            document.getElementById('info-banner').classList.add('hidden');
+            localStorage.setItem('infoBannerClosed', 'true');
+        }
+
+        // Check if info banner should be shown
+        if (localStorage.getItem('infoBannerClosed') === 'true') {
+            document.getElementById('info-banner').classList.add('hidden');
+        }
+
+        // Save node data
+        function saveNodeData() {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].name = document.getElementById('node-name').value;
+            nodeData[currentNodeId].description = document.getElementById('node-description').value;
+
+            saveToLocalStorage();
+
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '✓ Saved!';
+            saveBtn.style.background = '#28a745';
+
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.background = '';
+            }, 2000);
+        }
+
+        // Render links list
+        function renderLinks() {
+            const linksList = document.getElementById('links-list');
+            const links = nodeData[currentNodeId].links;
+
+            if (links.length === 0) {
+                linksList.innerHTML = '<li class="empty-state">No links attached</li>';
+                return;
+            }
+
+            linksList.innerHTML = links.map((link, index) => `
+                <li class="link-item">
+                    <a href="${link}" target="_blank" rel="noopener">${link}</a>
+                    <button class="btn btn-danger btn-small" onclick="removeLink(${index})">×</button>
+                </li>
+            `).join('');
+        }
+
+        // Add link
+        function addLink() {
+            if (!currentNodeId) {
+                alert('Please select a node first');
+                return;
+            }
+
+            const urlInput = document.getElementById('new-link-url');
+            const url = urlInput.value.trim();
+
+            if (!url) return;
+
+            const fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
+
+            nodeData[currentNodeId].links.push(fullUrl);
+            urlInput.value = '';
+
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Remove link
+        function removeLink(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].links.splice(index, 1);
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Render files list
+        function renderFiles() {
+            const filesList = document.getElementById('files-list');
+            const files = nodeData[currentNodeId].files;
+
+            if (files.length === 0) {
+                filesList.innerHTML = '<li class="empty-state">No files attached</li>';
+                return;
+            }
+
+            filesList.innerHTML = files.map((file, index) => `
+                <li class="file-item">
+                    <span>${file}</span>
+                    <button class="btn btn-danger btn-small" onclick="removeFile(${index})">×</button>
+                </li>
+            `).join('');
+        }
+
+        // Add file
+        function addFile() {
+            if (!currentNodeId) {
+                alert('Please select a node first');
+                return;
+            }
+
+            const fileInput = document.getElementById('new-file-name');
+            const fileName = fileInput.value.trim();
+
+            if (!fileName) return;
+
+            nodeData[currentNodeId].files.push(fileName);
+            fileInput.value = '';
+
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Remove file
+        function removeFile(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].files.splice(index, 1);
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Zoom controls
+        function zoomIn() {
+            if (panZoomInstance) {
+                panZoomInstance.zoomIn();
+            }
+        }
+
+        function zoomOut() {
+            if (panZoomInstance) {
+                panZoomInstance.zoomOut();
+            }
+        }
+
+        function resetZoom() {
+            if (panZoomInstance) {
+                panZoomInstance.reset();
+                panZoomInstance.fit();
+                panZoomInstance.center();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+            if ((e.key === '+' || e.key === '=') && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                zoomIn();
+            }
+            if (e.key === '-' && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                zoomOut();
+            }
+            if (e.key === '0' && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                resetZoom();
+            }
+        });
+
+        // Initialize
+        loadNodeData();
+        loadSVG();
+    </script>
+</body>
+</html>
