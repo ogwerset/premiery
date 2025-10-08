@@ -1,0 +1,6 @@
+- tryb ciemny 
+- guzik, ktory pozwala na wyeksportowanie z tej wersji strony calego info o node'ach dla claude zeby zaimplementowal to do kolejnej wersji 
+- fallback i postepy dla tego procesu powyzej 
+- ladniejszy interfejs, czystszy
+- mapka ktora pokazuje gdzie sie jest na stronie 
+- responsywnosc mobilna i skalowanie miedzy urzadzeniami 
