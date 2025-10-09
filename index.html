@@ -3,9 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>flowchart - przygotowanie premiery</title>
+    <title>Interactive Workflow Diagram</title>
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
     <style>
+        :root {
+            /* Light mode colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f0f0f0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --text-tertiary: #999;
+            --border-color: #e0e0e0;
+            --border-light: #d0d0d0;
+            --accent-color: #1BA1E2;
+            --accent-hover: #1589C9;
+            --shadow-sm: rgba(0,0,0,0.05);
+            --shadow-md: rgba(0,0,0,0.1);
+            --danger-color: #dc3545;
+            --danger-hover: #c82333;
+            --success-color: #28a745;
+            --secondary-btn: #6c757d;
+            --secondary-btn-hover: #5a6268;
+        }
+
+        body.dark-mode {
+            /* Dark mode colors */
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #808080;
+            --border-color: #404040;
+            --border-light: #505050;
+            --accent-color: #3db3f5;
+            --accent-hover: #2a9fd9;
+            --shadow-sm: rgba(0,0,0,0.3);
+            --shadow-md: rgba(0,0,0,0.5);
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --success-color: #2ecc71;
+            --secondary-btn: #95a5a6;
+            --secondary-btn-hover: #7f8c8d;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,7 +58,9 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             overflow: hidden;
             height: 100vh;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         #main-container {
@@ -28,7 +72,7 @@
         #svg-container {
             flex: 1;
             position: relative;
-            background: #ffffff;
+            background: var(--bg-primary);
             overflow: hidden;
         }
 
@@ -45,11 +89,11 @@
         /* Sidebar */
         #sidebar {
             width: 400px;
-            background: white;
-            border-left: 1px solid #e0e0e0;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
             padding: 0;
             overflow-y: auto;
-            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+            box-shadow: -2px 0 8px var(--shadow-md);
             position: fixed;
             top: 0;
             right: -400px;
@@ -69,18 +113,18 @@
         .sidebar-header {
             margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .sidebar-header h2 {
             font-size: 20px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: var(--text-primary);
             margin-bottom: 4px;
         }
 
         .sidebar-header p {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 13px;
         }
 
@@ -91,7 +135,7 @@
         .form-group label {
             display: block;
             margin-bottom: 6px;
-            color: #1a1a1a;
+            color: var(--text-primary);
             font-weight: 500;
             font-size: 14px;
         }
@@ -100,17 +144,19 @@
         .form-group textarea {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #d0d0d0;
+            border: 1px solid var(--border-light);
             border-radius: 4px;
             font-size: 14px;
             font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             transition: all 0.2s;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #1BA1E2;
+            border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(27, 161, 226, 0.1);
         }
 
@@ -129,14 +175,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             margin-bottom: 6px;
         }
 
         .link-item a {
-            color: #1BA1E2;
+            color: var(--accent-color);
             text-decoration: none;
             flex: 1;
             overflow: hidden;
@@ -155,7 +201,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             font-size: 13px;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .btn {
@@ -170,32 +216,32 @@
         }
 
         .btn-primary {
-            background: #1BA1E2;
+            background: var(--accent-color);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #1589C9;
+            background: var(--accent-hover);
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: var(--secondary-btn);
             color: white;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
+            background: var(--secondary-btn-hover);
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: var(--danger-color);
             color: white;
             font-size: 11px;
             padding: 6px 10px;
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            background: var(--danger-hover);
         }
 
         .btn-small {
@@ -208,7 +254,7 @@
             gap: 10px;
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid var(--border-color);
         }
 
         .add-link-form, .add-file-form {
@@ -228,14 +274,14 @@
             left: 0;
             right: 0;
             height: 56px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px var(--shadow-sm);
         }
 
         .toolbar-left {
@@ -247,7 +293,7 @@
         .toolbar-title {
             font-size: 18px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: var(--text-primary);
         }
 
         .toolbar-right {
@@ -261,9 +307,9 @@
             align-items: center;
             gap: 8px;
             padding: 4px 8px;
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             border-radius: 4px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--border-color);
         }
 
         #zoom-level {
@@ -272,7 +318,7 @@
             min-width: 50px;
             text-align: center;
             font-weight: 500;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .zoom-btn {
@@ -282,18 +328,18 @@
             align-items: center;
             justify-content: center;
             border: none;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 3px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            color: #666;
+            color: var(--text-secondary);
             transition: all 0.15s;
         }
 
         .zoom-btn:hover {
-            background: #e9ecef;
-            color: #1a1a1a;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
 
         #toggle-sidebar-btn {
@@ -315,7 +361,7 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
-            color: #999;
+            color: var(--text-tertiary);
             line-height: 1;
             padding: 4px 8px;
             border-radius: 4px;
@@ -323,13 +369,13 @@
         }
 
         .close-btn:hover {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
 
         .empty-state {
             text-align: center;
-            color: #999;
+            color: var(--text-tertiary);
             padding: 12px;
             font-size: 13px;
             font-style: italic;
@@ -340,11 +386,11 @@
             position: absolute;
             top: 72px;
             right: 20px;
-            background: white;
+            background: var(--bg-primary);
             padding: 16px 20px;
             border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px var(--shadow-md);
+            border: 1px solid var(--border-color);
             z-index: 99;
             max-width: 280px;
             transition: all 0.3s;
@@ -366,7 +412,7 @@
         .info-banner h3 {
             font-size: 15px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: var(--text-primary);
         }
 
         .info-close {
@@ -374,18 +420,18 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: #999;
+            color: var(--text-tertiary);
             padding: 0;
             line-height: 1;
         }
 
         .info-close:hover {
-            color: #333;
+            color: var(--text-primary);
         }
 
         .info-banner p {
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 6px;
             line-height: 1.5;
         }
@@ -397,11 +443,27 @@
         /* Clickable nodes */
         #svg-wrapper svg .node-interactive {
             cursor: pointer;
-            transition: opacity 0.15s;
+            transition: all 0.2s ease;
         }
 
         #svg-wrapper svg .node-interactive:hover {
-            opacity: 0.85;
+            filter: drop-shadow(0 0 12px rgba(27, 161, 226, 0.8)) brightness(1.05);
+            transform: scale(1.02);
+        }
+
+        body.dark-mode #svg-wrapper svg .node-interactive:hover {
+            filter: drop-shadow(0 0 16px rgba(61, 179, 245, 0.9)) brightness(1.1);
+        }
+
+        /* Selected node outline */
+        #svg-wrapper svg .node-selected {
+            filter: drop-shadow(0 0 8px rgba(27, 161, 226, 1));
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        body.dark-mode #svg-wrapper svg .node-selected {
+            filter: drop-shadow(0 0 12px rgba(61, 179, 245, 1));
         }
 
         /* Content area with toolbar offset */
@@ -420,14 +482,14 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #f0f0f0;
-            border-top-color: #1BA1E2;
+            border: 3px solid var(--bg-tertiary);
+            border-top-color: var(--accent-color);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 12px;
@@ -437,11 +499,115 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Minimap */
+        .minimap {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 220px;
+            height: 160px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 2px 12px var(--shadow-md);
+            overflow: hidden;
+            z-index: 98;
+            transition: all 0.3s;
+        }
+
+        .minimap.hidden {
+            transform: translateX(-260px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .minimap-header {
+            background: var(--bg-secondary);
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .minimap-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .minimap-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .minimap-close:hover {
+            color: var(--text-primary);
+        }
+
+        .minimap-container {
+            width: 100%;
+            height: calc(100% - 30px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .minimap-container svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .minimap-viewport {
+            position: absolute;
+            border: 2px solid var(--accent-color);
+            background: rgba(27, 161, 226, 0.15);
+            cursor: move;
+            pointer-events: all;
+        }
+
+        body.dark-mode .minimap-viewport {
+            border-color: var(--accent-color);
+            background: rgba(61, 179, 245, 0.2);
+        }
+
+        .minimap-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 97;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px var(--shadow-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .minimap-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .minimap-toggle.with-minimap {
+            display: none;
+        }
+
         /* View Mode Styles */
         body.view-mode #node-name,
         body.view-mode #node-description {
-            background-color: #f8f9fa;
-            border-color: #e9ecef;
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
             cursor: default;
             pointer-events: none;
         }
@@ -461,7 +627,12 @@
         }
 
         body.view-mode #sidebar-content #node-id {
-            color: #666;
+            color: var(--text-secondary);
+        }
+
+        /* Hidden file input for import */
+        #import-file-input {
+            display: none;
         }
     </style>
 </head>
@@ -470,46 +641,78 @@
         <div id="svg-container">
             <div class="toolbar">
                 <div class="toolbar-left">
-                    <div class="toolbar-title">flowchart - przygotowanie premiery</div>
-                    <span style="font-size: 12px; color: #999; margin-left: 8px;">v1.2.0</span>
+                    <div class="toolbar-title">Workflow Diagram</div>
+                    <span style="font-size: 12px; color: var(--text-tertiary); margin-left: 8px;">v1.3.0</span>
                 </div>
                 <div class="toolbar-right">
+                    <!-- Export/Import buttons (visibility controlled by mode) -->
+                    <button class="btn btn-secondary btn-small" id="export-btn" onclick="exportData()" title="Eksportuj dane do pliku JSON" style="display: none;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span>Eksportuj</span>
+                    </button>
+                    <button class="btn btn-secondary btn-small" id="import-btn" onclick="triggerImport()" title="Importuj dane z pliku JSON" style="display: none;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L9 8m4-4v12"></path>
+                        </svg>
+                        <span>Importuj</span>
+                    </button>
+                    <input type="file" id="import-file-input" accept=".json" onchange="importData(event)" />
+
                     <div class="zoom-controls">
-                        <button class="zoom-btn" onclick="zoomOut()" title="Zoom out (-)">−</button>
+                        <button class="zoom-btn" onclick="zoomOut()" title="Pomniejsz (-)">−</button>
                         <div id="zoom-level">100%</div>
-                        <button class="zoom-btn" onclick="zoomIn()" title="Zoom in (+)">+</button>
-                        <button class="btn btn-secondary btn-small" onclick="resetZoom()" title="Reset view (0)">Reset</button>
+                        <button class="zoom-btn" onclick="zoomIn()" title="Powiększ (+)">+</button>
+                        <button class="btn btn-secondary btn-small" onclick="resetZoom()" title="Resetuj widok (0)">Reset</button>
                     </div>
-                    <button class="btn btn-secondary btn-small" id="mode-toggle-btn" onclick="toggleMode()" title="Toggle between edit and view mode">
+                    <button class="btn btn-secondary btn-small" id="dark-mode-toggle" onclick="toggleDarkMode()" title="Przełącz tryb ciemny/jasny">
+                        <svg id="dark-mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary btn-small" id="mode-toggle-btn" onclick="toggleMode()" title="Przełącz między trybem edycji a widoku">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
-                        <span id="mode-label">Dev</span>
+                        <span id="mode-label">Tryb Dev</span>
                     </button>
                     <button class="btn btn-primary btn-small" id="toggle-sidebar-btn" onclick="toggleSidebar()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <span>Szczegóły</span>
+                        <span>Szczegóły węzła</span>
                     </button>
                 </div>
             </div>
 
             <div class="info-banner" id="info-banner">
                 <div class="info-banner-header">
-                    <h3>Jak korzystać?</h3>
+                    <h3>Krótki przewodnik</h3>
                     <button class="info-close" onclick="closeInfoBanner()">&times;</button>
                 </div>
-                <p id="banner-mode-text">🖱️ Wybierz element, żeby zobaczyć szczegóły/edit details</p>
-                <p>🔍 Przybliżaj/oddalaj myszką</p>
-                <p>✋ Przeciągnij, żeby zmienić miejsce na diagramie</p>
+                <p id="banner-mode-text">🖱️ Kliknij dowolny węzeł, aby wyświetlić/edytować szczegóły</p>
+                <p>🔍 Przewiń, aby powiększyć i pomniejszyć</p>
+                <p>✋ Przeciągnij, aby przesunąć diagram</p>
             </div>
+
+            <!-- Minimap -->
+            <div class="minimap" id="minimap">
+                <div class="minimap-header">
+                    <span class="minimap-title">Mapa</span>
+                    <button class="minimap-close" onclick="toggleMinimap()">&times;</button>
+                </div>
+                <div class="minimap-container" id="minimap-container">
+                    <div class="minimap-viewport" id="minimap-viewport"></div>
+                </div>
+            </div>
+            <button class="minimap-toggle" id="minimap-toggle" onclick="toggleMinimap()">🗺️ Mapa</button>
 
             <div id="content-wrapper">
                 <div id="svg-wrapper">
                     <div class="loading">
                         <div class="loading-spinner"></div>
-                        <div>Ładuję..</div>
+                        <div>Ładowanie diagramu...</div>
                     </div>
                 </div>
             </div>
@@ -519,24 +722,24 @@
             <div id="sidebar-content">
                 <button class="close-btn" onclick="closeSidebar()">&times;</button>
                 <div class="sidebar-header">
-                    <h2 id="node-title">Wybierz element</h2>
-                    <p id="node-id">Click any node on the diagram to edit</p>
+                    <h2 id="node-title">Wybierz węzeł</h2>
+                    <p id="node-id">Kliknij dowolny węzeł na diagramie, aby edytować</p>
                 </div>
 
                 <div class="form-group">
-                    <label for="node-name">Nazwa</label>
-                    <input type="text" id="node-name" placeholder="Enter node name">
+                    <label for="node-name">Nazwa węzła</label>
+                    <input type="text" id="node-name" placeholder="Wprowadź nazwę węzła">
                 </div>
 
                 <div class="form-group">
                     <label for="node-description">Opis</label>
-                    <textarea id="node-description" placeholder="Add a description for this node"></textarea>
+                    <textarea id="node-description" placeholder="Dodaj opis tego węzła"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Linkis</label>
+                    <label>Załączone linki</label>
                     <ul class="links-list" id="links-list">
-                        <li class="empty-state">Select a node to add links</li>
+                        <li class="empty-state">Wybierz węzeł, aby dodać linki</li>
                     </ul>
                     <div class="add-link-form">
                         <input type="text" id="new-link-url" placeholder="https://example.com">
@@ -545,18 +748,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Pliki</label>
+                    <label>Załączone pliki</label>
                     <ul class="files-list" id="files-list">
-                        <li class="empty-state">Select a node to add files</li>
+                        <li class="empty-state">Wybierz węzeł, aby dodać pliki</li>
                     </ul>
                     <div class="add-file-form">
-                        <input type="text" id="new-file-name" placeholder="document.pdf">
+                        <input type="text" id="new-file-name" placeholder="dokument.pdf">
                         <button class="btn btn-primary btn-small" onclick="addFile()">Dodaj</button>
                     </div>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="saveNodeData()" style="flex: 1">Zapisz</button>
+                    <button class="btn btn-primary" onclick="saveNodeData()" style="flex: 1">Zapisz zmiany</button>
                     <button class="btn btn-secondary" onclick="closeSidebar()">Zamknij</button>
                 </div>
             </div>
@@ -607,10 +810,19 @@
                         // Update zoom level display
                         panZoomInstance.setOnZoom(function(level) {
                             document.getElementById('zoom-level').textContent = Math.round(level * 100) + '%';
+                            updateMinimapViewport();
+                        });
+
+                        // Update minimap on pan
+                        panZoomInstance.setOnPan(function() {
+                            updateMinimapViewport();
                         });
 
                         // Make nodes clickable
                         makeNodesClickable();
+
+                        // Initialize minimap
+                        initMinimap();
                     }
                 }, 100);
             } catch (error) {
@@ -646,12 +858,22 @@
 
         // Open node editor sidebar
         function openNodeEditor(nodeId, element) {
+            // Remove selection from previously selected node
+            if (selectedElement) {
+                selectedElement.classList.remove('node-selected');
+            }
+
             currentNodeId = nodeId;
             selectedElement = element;
 
+            // Add selection to new node
+            if (selectedElement) {
+                selectedElement.classList.add('node-selected');
+            }
+
             // Get node text content
             const textElement = element.querySelector('text');
-            const nodeText = textElement ? textElement.textContent.trim() : 'Unnamed Node';
+            const nodeText = textElement ? textElement.textContent.trim() : 'Nienazwany węzeł';
 
             // Load existing data or create new
             if (!nodeData[nodeId]) {
@@ -704,12 +926,17 @@
 
         // Close sidebar
         function closeSidebar() {
+            // Remove selection from node
+            if (selectedElement) {
+                selectedElement.classList.remove('node-selected');
+            }
+
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('toggle-sidebar-btn').innerHTML = `
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
-                <span>Node Details</span>
+                <span>Szczegóły węzła</span>
             `;
             currentNodeId = null;
             selectedElement = null;
@@ -720,6 +947,7 @@
             const isViewMode = document.body.classList.toggle('view-mode');
             localStorage.setItem('viewMode', isViewMode);
             updateModeUI(isViewMode);
+            updateExportImportButtons(isViewMode);
         }
 
         // Update UI based on current mode
@@ -729,23 +957,23 @@
             const nodeIdText = document.getElementById('node-id');
 
             if (isViewMode) {
-                modeLabel.textContent = 'View Mode';
-                bannerText.textContent = '🖱️ Click any node to view details';
+                modeLabel.textContent = 'Tryb widoku';
+                bannerText.textContent = '🖱️ Kliknij dowolny węzeł, aby wyświetlić szczegóły';
                 if (currentNodeId) {
-                    nodeIdText.textContent = `Node ID: ${currentNodeId}`;
+                    nodeIdText.textContent = `ID węzła: ${currentNodeId}`;
                 } else {
-                    nodeIdText.textContent = 'Click any node on the diagram to view';
+                    nodeIdText.textContent = 'Kliknij dowolny węzeł na diagramie, aby wyświetlić';
                 }
                 // Make inputs readonly
                 document.getElementById('node-name').setAttribute('readonly', 'readonly');
                 document.getElementById('node-description').setAttribute('readonly', 'readonly');
             } else {
-                modeLabel.textContent = 'Dev Mode';
-                bannerText.textContent = '🖱️ Click any node to view/edit details';
+                modeLabel.textContent = 'Tryb Dev';
+                bannerText.textContent = '🖱️ Kliknij dowolny węzeł, aby wyświetlić/edytować szczegóły';
                 if (currentNodeId) {
-                    nodeIdText.textContent = `Node ID: ${currentNodeId}`;
+                    nodeIdText.textContent = `ID węzła: ${currentNodeId}`;
                 } else {
-                    nodeIdText.textContent = 'Click any node on the diagram to edit';
+                    nodeIdText.textContent = 'Kliknij dowolny węzeł na diagramie, aby edytować';
                 }
                 // Make inputs editable
                 document.getElementById('node-name').removeAttribute('readonly');
@@ -760,6 +988,21 @@
                 document.body.classList.add('view-mode');
             }
             updateModeUI(isViewMode);
+            updateExportImportButtons(isViewMode);
+        }
+
+        // Update export/import buttons visibility based on mode
+        function updateExportImportButtons(isViewMode) {
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+
+            if (isViewMode) {
+                exportBtn.style.display = 'none';
+                importBtn.style.display = 'flex';
+            } else {
+                exportBtn.style.display = 'flex';
+                importBtn.style.display = 'none';
+            }
         }
 
         // Close info banner
@@ -773,6 +1016,257 @@
             document.getElementById('info-banner').classList.add('hidden');
         }
 
+        // ===== DARK MODE =====
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateDarkModeIcon(isDarkMode);
+        }
+
+        function updateDarkModeIcon(isDarkMode) {
+            const icon = document.getElementById('dark-mode-icon');
+            if (isDarkMode) {
+                // Sun icon for light mode
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>';
+            } else {
+                // Moon icon for dark mode
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>';
+            }
+        }
+
+        function initDarkMode() {
+            // Check for saved preference
+            const savedDarkMode = localStorage.getItem('darkMode');
+
+            if (savedDarkMode !== null) {
+                // Use saved preference
+                if (savedDarkMode === 'true') {
+                    document.body.classList.add('dark-mode');
+                    updateDarkModeIcon(true);
+                }
+            } else {
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'true');
+                    updateDarkModeIcon(true);
+                }
+            }
+
+            // Listen for system preference changes
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    // Only auto-switch if user hasn't set a preference
+                    if (localStorage.getItem('darkMode') === null) {
+                        if (e.matches) {
+                            document.body.classList.add('dark-mode');
+                            updateDarkModeIcon(true);
+                        } else {
+                            document.body.classList.remove('dark-mode');
+                            updateDarkModeIcon(false);
+                        }
+                    }
+                });
+            }
+        }
+
+        // ===== EXPORT/IMPORT =====
+        function exportData() {
+            const dataStr = JSON.stringify(nodeData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'workflow-data.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // Show success message
+            const exportBtn = document.getElementById('export-btn');
+            const originalHTML = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<span>✓ Wyeksportowano!</span>';
+            exportBtn.style.background = '#2ecc71';
+            setTimeout(() => {
+                exportBtn.innerHTML = originalHTML;
+                exportBtn.style.background = '';
+            }, 2000);
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file-input').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+
+                    // Validate structure
+                    if (typeof imported !== 'object') {
+                        throw new Error('Invalid data format');
+                    }
+
+                    // Import data
+                    nodeData = imported;
+                    saveToLocalStorage();
+
+                    // Show success message
+                    const importBtn = document.getElementById('import-btn');
+                    const originalHTML = importBtn.innerHTML;
+                    importBtn.innerHTML = '<span>✓ Zaimportowano!</span>';
+                    importBtn.style.background = '#2ecc71';
+                    setTimeout(() => {
+                        importBtn.innerHTML = originalHTML;
+                        importBtn.style.background = '';
+                    }, 2000);
+
+                    // Refresh current node if open
+                    if (currentNodeId && nodeData[currentNodeId]) {
+                        document.getElementById('node-name').value = nodeData[currentNodeId].name;
+                        document.getElementById('node-description').value = nodeData[currentNodeId].description;
+                        renderLinks();
+                        renderFiles();
+                    }
+                } catch (error) {
+                    alert('Błąd importu: Nieprawidłowy format pliku JSON');
+                    console.error('Import error:', error);
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // ===== MINIMAP =====
+        function initMinimap() {
+            const svgWrapper = document.getElementById('svg-wrapper');
+            const svgElement = svgWrapper.querySelector('svg');
+            if (!svgElement) return;
+
+            // Clone SVG for minimap
+            const minimapContainer = document.getElementById('minimap-container');
+            const svgClone = svgElement.cloneNode(true);
+
+            // Remove interactivity from clone
+            svgClone.querySelectorAll('.node-interactive').forEach(node => {
+                node.classList.remove('node-interactive');
+                node.style.cursor = 'default';
+            });
+
+            minimapContainer.insertBefore(svgClone, minimapContainer.firstChild);
+
+            // Initialize viewport rectangle
+            updateMinimapViewport();
+
+            // Make viewport draggable
+            makeViewportDraggable();
+
+            // Check if minimap should be shown
+            const minimapHidden = localStorage.getItem('minimapHidden') === 'true';
+            if (minimapHidden) {
+                document.getElementById('minimap').classList.add('hidden');
+                document.getElementById('minimap-toggle').classList.remove('with-minimap');
+            } else {
+                document.getElementById('minimap-toggle').classList.add('with-minimap');
+            }
+        }
+
+        function updateMinimapViewport() {
+            if (!panZoomInstance) return;
+
+            const viewport = document.getElementById('minimap-viewport');
+            const minimap = document.getElementById('minimap');
+            const minimapContainer = document.getElementById('minimap-container');
+            const svgElement = document.querySelector('#svg-wrapper svg');
+
+            if (!viewport || !svgElement || minimap.classList.contains('hidden')) return;
+
+            const pan = panZoomInstance.getPan();
+            const zoom = panZoomInstance.getZoom();
+            const sizes = panZoomInstance.getSizes();
+
+            // Calculate viewport position and size relative to minimap
+            const minimapRect = minimapContainer.getBoundingClientRect();
+            const svgRect = svgElement.getBoundingClientRect();
+
+            const scaleX = minimapRect.width / sizes.width;
+            const scaleY = minimapRect.height / sizes.height;
+
+            const viewportWidth = (sizes.viewBox.width / zoom) * scaleX;
+            const viewportHeight = (sizes.viewBox.height / zoom) * scaleY;
+            const viewportX = (-pan.x / zoom) * scaleX;
+            const viewportY = (-pan.y / zoom) * scaleY;
+
+            viewport.style.width = viewportWidth + 'px';
+            viewport.style.height = viewportHeight + 'px';
+            viewport.style.left = viewportX + 'px';
+            viewport.style.top = viewportY + 'px';
+        }
+
+        function makeViewportDraggable() {
+            const viewport = document.getElementById('minimap-viewport');
+            const minimapContainer = document.getElementById('minimap-container');
+            let isDragging = false;
+
+            function moveViewport(clientX, clientY) {
+                if (!panZoomInstance) return;
+
+                const rect = minimapContainer.getBoundingClientRect();
+                const x = (clientX - rect.left) / rect.width;
+                const y = (clientY - rect.top) / rect.height;
+
+                const sizes = panZoomInstance.getSizes();
+                const zoom = panZoomInstance.getZoom();
+
+                const panX = -x * sizes.width * zoom + (sizes.viewBox.width / 2);
+                const panY = -y * sizes.height * zoom + (sizes.viewBox.height / 2);
+
+                panZoomInstance.pan({ x: panX, y: panY });
+            }
+
+            viewport.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                e.preventDefault();
+            });
+
+            minimapContainer.addEventListener('click', (e) => {
+                if (e.target === viewport) return;
+                moveViewport(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    moveViewport(e.clientX, e.clientY);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        }
+
+        function toggleMinimap() {
+            const minimap = document.getElementById('minimap');
+            const toggle = document.getElementById('minimap-toggle');
+            const isHidden = minimap.classList.toggle('hidden');
+
+            localStorage.setItem('minimapHidden', isHidden);
+
+            if (isHidden) {
+                toggle.classList.remove('with-minimap');
+            } else {
+                toggle.classList.add('with-minimap');
+                updateMinimapViewport();
+            }
+        }
+
         // Save node data
         function saveNodeData() {
             if (!currentNodeId) return;
@@ -784,8 +1278,8 @@
 
             const saveBtn = event.target;
             const originalText = saveBtn.textContent;
-            saveBtn.textContent = '✓ Saved!';
-            saveBtn.style.background = '#28a745';
+            saveBtn.textContent = '✓ Zapisano!';
+            saveBtn.style.background = var(--success-color);
 
             setTimeout(() => {
                 saveBtn.textContent = originalText;
@@ -799,7 +1293,7 @@
             const links = nodeData[currentNodeId].links;
 
             if (links.length === 0) {
-                linksList.innerHTML = '<li class="empty-state">No links attached</li>';
+                linksList.innerHTML = '<li class="empty-state">Brak załączonych linków</li>';
                 return;
             }
 
@@ -814,7 +1308,7 @@
         // Add link
         function addLink() {
             if (!currentNodeId) {
-                alert('Please select a node first');
+                alert('Najpierw wybierz węzeł');
                 return;
             }
 
@@ -847,7 +1341,7 @@
             const files = nodeData[currentNodeId].files;
 
             if (files.length === 0) {
-                filesList.innerHTML = '<li class="empty-state">No files attached</li>';
+                filesList.innerHTML = '<li class="empty-state">Brak załączonych plików</li>';
                 return;
             }
 
@@ -862,7 +1356,7 @@
         // Add file
         function addFile() {
             if (!currentNodeId) {
-                alert('Please select a node first');
+                alert('Najpierw wybierz węzeł');
                 return;
             }
 
@@ -930,6 +1424,7 @@
         // Initialize
         loadNodeData();
         initMode();
+        initDarkMode();
         loadSVG();
     </script>
 </body>
