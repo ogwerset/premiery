@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.5.2 (Mobile UX Improvements)
+ * Version: 1.5.3 (Mobile Toolbar & Text Fixes)
  */
 
 // ================================================
@@ -26,7 +26,8 @@ const state = {
     nodeData: {},
     selectedElement: null,
     minimapInitialized: false,
-    lastMinimapUpdate: 0
+    lastMinimapUpdate: 0,
+    toolbarHidden: false
 };
 
 // ================================================
@@ -1180,6 +1181,47 @@ function closeMobileMenu() {
 // ================================================
 
 /**
+ * Toggle toolbar visibility on mobile
+ */
+function toggleToolbar() {
+    const toolbar = document.querySelector('.toolbar');
+    if (toolbar && window.innerWidth <= 767) {
+        state.toolbarHidden = !state.toolbarHidden;
+        if (state.toolbarHidden) {
+            toolbar.classList.add('toolbar-hidden');
+        } else {
+            toolbar.classList.remove('toolbar-hidden');
+        }
+    }
+}
+
+/**
+ * Hide toolbar when clicking on diagram (mobile only)
+ */
+function hideToolbarOnDiagramClick() {
+    if (window.innerWidth <= 767) {
+        const toolbar = document.querySelector('.toolbar');
+        if (toolbar && !state.toolbarHidden) {
+            state.toolbarHidden = true;
+            toolbar.classList.add('toolbar-hidden');
+        }
+    }
+}
+
+/**
+ * Show toolbar (mobile only)
+ */
+function showToolbar() {
+    if (window.innerWidth <= 767) {
+        const toolbar = document.querySelector('.toolbar');
+        if (toolbar && state.toolbarHidden) {
+            state.toolbarHidden = false;
+            toolbar.classList.remove('toolbar-hidden');
+        }
+    }
+}
+
+/**
  * Setup all event listeners using event delegation
  */
 function setupEventListeners() {
@@ -1284,6 +1326,34 @@ function setupEventListeners() {
             resetZoom();
         }
     });
+
+    // Click on diagram to hide toolbar (mobile)
+    const svgWrapper = document.getElementById('svg-wrapper');
+    if (svgWrapper) {
+        svgWrapper.addEventListener('click', (e) => {
+            // Only hide toolbar if clicking on the SVG itself, not on nodes
+            if (e.target.tagName === 'svg' || e.target.closest('svg') && !e.target.closest('.node-interactive')) {
+                hideToolbarOnDiagramClick();
+            }
+        });
+    }
+
+    // Tap on empty area to show toolbar back (mobile)
+    const contentWrapper = document.getElementById('content-wrapper');
+    if (contentWrapper) {
+        contentWrapper.addEventListener('dblclick', showToolbar);
+
+        // Double tap for mobile
+        let lastTap = 0;
+        contentWrapper.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 500 && tapLength > 0) {
+                showToolbar();
+            }
+            lastTap = currentTime;
+        });
+    }
 }
 
 // ================================================

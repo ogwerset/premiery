@@ -1,6 +1,6 @@
 /* ================================================
    Interactive Workflow Diagram - Styles
-   Version: 1.5.2 (Mobile UX Improvements)
+   Version: 1.5.3 (Mobile Toolbar & Text Fixes)
    ================================================ */
 
 /* CSS Variables - Theme Colors */
@@ -694,9 +694,11 @@ body.view-mode .dev-mode-indicator {
     transition: all 0.2s ease;
 }
 
-/* Prevent text elements from interfering */
+/* Prevent text elements from interfering but keep them visible */
 #svg-wrapper svg .node-interactive text {
-    pointer-events: none;
+    pointer-events: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 #svg-wrapper svg .node-interactive:hover {
@@ -986,16 +988,26 @@ body.view-mode #sidebar-content #node-id {
 
     /* Compact toolbar */
     .toolbar {
-        height: 48px;
-        padding: 0 12px;
+        height: 56px;
+        padding: 0 8px 0 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .toolbar.toolbar-hidden {
+        transform: translateY(-100%);
     }
 
     .toolbar-left {
         gap: 8px;
+        flex-shrink: 1;
+        min-width: 0;
     }
 
     .toolbar-title {
-        font-size: 16px;
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .toolbar-left span {
@@ -1005,6 +1017,7 @@ body.view-mode #sidebar-content #node-id {
     .toolbar-right {
         gap: 6px;
         position: relative;
+        flex-shrink: 0;
     }
 
     /* Show hamburger menu button on mobile */
@@ -1151,7 +1164,13 @@ body.view-mode #sidebar-content #node-id {
 
     /* Content wrapper */
     #content-wrapper {
-        top: 48px;
+        top: 56px;
+        transition: top 0.3s ease;
+    }
+
+    /* When toolbar is hidden, content takes full height */
+    .toolbar.toolbar-hidden ~ #content-wrapper {
+        top: 0;
     }
 
     /* Adjust button group for mobile */
@@ -1200,16 +1219,25 @@ body.view-mode #sidebar-content #node-id {
         -webkit-touch-callout: none;
     }
 
-    /* Prevent SVG text from flickering on touch */
+    /* CRITICAL: Force SVG text to stay visible and non-interactive */
     #svg-wrapper svg text {
-        pointer-events: none;
+        pointer-events: none !important;
         user-select: none;
         -webkit-user-select: none;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     /* Ensure nodes stay stable on touch */
     #svg-wrapper svg .node-interactive {
         -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Prevent any text elements from being hidden */
+    #svg-wrapper svg g text,
+    #svg-wrapper svg g[data-cell-id] text {
+        display: block !important;
+        visibility: visible !important;
     }
 
     .toolbar,
