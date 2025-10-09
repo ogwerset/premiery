@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.4.0 (Mobile Responsive + Touch Support)
+ * Version: 1.4.1 (UX/Mobile Improvements + Bug Fixes)
  */
 
 // ================================================
@@ -188,6 +188,10 @@ async function loadSVG() {
                 // Apply dark mode background if enabled
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 updateSvgBackground(isDarkMode);
+                // Initialize minimap automatically after SVG is ready
+                setTimeout(() => {
+                    initMinimap();
+                }, 200);
             }
         }, CONSTANTS.SVG_INIT_DELAY);
     } catch (error) {
@@ -795,17 +799,23 @@ function importData(event) {
  * Initialize minimap (lazy loaded)
  */
 function initMinimap() {
-    if (state.minimapInitialized) return;
+    if (state.minimapInitialized) {
+        console.log('Minimap already initialized');
+        return;
+    }
+
+    console.log('Initializing minimap...');
 
     const svgWrapper = elements.svgWrapper;
     const svgElement = svgWrapper.querySelector('svg');
     if (!svgElement) {
-        console.warn('SVG element not found for minimap initialization');
+        console.error('SVG element not found for minimap initialization');
         return;
     }
 
     // Clone SVG for minimap
     const svgClone = svgElement.cloneNode(true);
+    console.log('SVG cloned for minimap');
 
     // Remove interactivity from clone
     svgClone.querySelectorAll('.node-interactive').forEach(node => {
@@ -835,6 +845,7 @@ function initMinimap() {
 
     // Insert SVG before viewport
     elements.minimapContainer.insertBefore(svgClone, elements.minimapViewport);
+    console.log('SVG inserted into minimap container');
 
     // Initialize viewport rectangle
     updateMinimapViewport();
@@ -842,50 +853,68 @@ function initMinimap() {
     // Make viewport draggable
     makeViewportDraggable();
 
-    // Check if minimap should be shown
-    const minimapHidden = localStorage.getItem('minimapHidden') === 'true';
-    if (minimapHidden) {
+    // Show minimap by default on first load
+    const minimapHidden = localStorage.getItem('minimapHidden');
+    if (minimapHidden === 'true') {
         elements.minimap.classList.add('hidden');
         elements.minimapToggle.classList.remove('with-minimap');
+        console.log('Minimap hidden by user preference');
     } else {
+        // Show minimap by default
+        elements.minimap.classList.remove('hidden');
         elements.minimapToggle.classList.add('with-minimap');
+        console.log('Minimap shown');
     }
 
     state.minimapInitialized = true;
+    console.log('Minimap initialization complete');
 }
 
 /**
  * Update minimap viewport indicator
  */
 function updateMinimapViewport() {
-    if (!state.panZoomInstance || !state.minimapInitialized) return;
+    if (!state.panZoomInstance || !state.minimapInitialized) {
+        console.log('Cannot update minimap viewport: panZoom or minimap not initialized');
+        return;
+    }
 
     const viewport = elements.minimapViewport;
     const minimap = elements.minimap;
     const minimapContainer = elements.minimapContainer;
     const svgElement = document.querySelector('#svg-wrapper svg');
 
-    if (!viewport || !svgElement || minimap.classList.contains('hidden')) return;
+    if (!viewport || !svgElement) {
+        console.error('Minimap viewport or SVG element not found');
+        return;
+    }
 
-    const pan = state.panZoomInstance.getPan();
-    const zoom = state.panZoomInstance.getZoom();
-    const sizes = state.panZoomInstance.getSizes();
+    if (minimap.classList.contains('hidden')) return;
 
-    // Calculate viewport position and size
-    const minimapRect = minimapContainer.getBoundingClientRect();
+    try {
+        const pan = state.panZoomInstance.getPan();
+        const zoom = state.panZoomInstance.getZoom();
+        const sizes = state.panZoomInstance.getSizes();
 
-    const scaleX = minimapRect.width / sizes.width;
-    const scaleY = minimapRect.height / sizes.height;
+        // Calculate viewport position and size
+        const minimapRect = minimapContainer.getBoundingClientRect();
 
-    const viewportWidth = (sizes.viewBox.width / zoom) * scaleX;
-    const viewportHeight = (sizes.viewBox.height / zoom) * scaleY;
-    const viewportX = (-pan.x / zoom) * scaleX;
-    const viewportY = (-pan.y / zoom) * scaleY;
+        const scaleX = minimapRect.width / sizes.width;
+        const scaleY = minimapRect.height / sizes.height;
 
-    viewport.style.width = viewportWidth + 'px';
-    viewport.style.height = viewportHeight + 'px';
-    viewport.style.left = viewportX + 'px';
-    viewport.style.top = viewportY + 'px';
+        const viewportWidth = (sizes.viewBox.width / zoom) * scaleX;
+        const viewportHeight = (sizes.viewBox.height / zoom) * scaleY;
+        const viewportX = (-pan.x / zoom) * scaleX;
+        const viewportY = (-pan.y / zoom) * scaleY;
+
+        viewport.style.width = viewportWidth + 'px';
+        viewport.style.height = viewportHeight + 'px';
+        viewport.style.left = viewportX + 'px';
+        viewport.style.top = viewportY + 'px';
+        viewport.style.display = 'block';
+    } catch (error) {
+        console.error('Error updating minimap viewport:', error);
+    }
 }
 
 /**
@@ -1036,6 +1065,47 @@ function initInfoBanner() {
     }
 }
 
+/**
+ * Close dev mode indicator
+ */
+function closeDevModeIndicator() {
+    const devModeIndicator = document.getElementById('dev-mode-indicator');
+    if (devModeIndicator) {
+        devModeIndicator.classList.add('hidden');
+        localStorage.setItem('devModeIndicatorClosed', 'true');
+    }
+}
+
+/**
+ * Initialize dev mode indicator state
+ */
+function initDevModeIndicator() {
+    const devModeIndicator = document.getElementById('dev-mode-indicator');
+    if (localStorage.getItem('devModeIndicatorClosed') === 'true') {
+        devModeIndicator.classList.add('hidden');
+    }
+}
+
+/**
+ * Toggle mobile menu
+ */
+function toggleMobileMenu() {
+    const toolbarControls = document.querySelector('.toolbar-controls');
+    if (toolbarControls) {
+        toolbarControls.classList.toggle('open');
+    }
+}
+
+/**
+ * Close mobile menu (e.g., when clicking a button inside)
+ */
+function closeMobileMenu() {
+    const toolbarControls = document.querySelector('.toolbar-controls');
+    if (toolbarControls && window.innerWidth <= 767) {
+        toolbarControls.classList.remove('open');
+    }
+}
+
 // ================================================
 // Event Listeners Setup
 // ================================================
@@ -1105,6 +1175,28 @@ function setupEventListeners() {
     // Info banner
     document.querySelector('.info-close').addEventListener('click', closeInfoBanner);
 
+    // Dev mode indicator
+    const devModeClose = document.querySelector('.dev-mode-close');
+    if (devModeClose) {
+        devModeClose.addEventListener('click', closeDevModeIndicator);
+    }
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Close mobile menu when clicking buttons inside
+    const toolbarControls = document.querySelector('.toolbar-controls');
+    if (toolbarControls) {
+        toolbarControls.addEventListener('click', (e) => {
+            if (e.target.closest('.btn')) {
+                setTimeout(closeMobileMenu, 100);
+            }
+        });
+    }
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -1138,6 +1230,7 @@ function initializeApp() {
     initMode();
     initDarkMode();
     initInfoBanner();
+    initDevModeIndicator();
     setupEventListeners();
     loadSVG();
 }

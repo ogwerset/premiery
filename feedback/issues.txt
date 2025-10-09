@@ -1,0 +1,67 @@
+PREMIERY APP - FEEDBACK & ISSUES
+================================
+
+Date: 2025-10-09
+
+HOW TO USE THIS FILE:
+---------------------
+1. Add screenshots to the feedback/screenshots/ folder
+2. Name them descriptively (e.g., "sidebar-bug.png", "mobile-menu-issue.png")
+3. Document each issue below using the template
+
+
+ISSUES TO FIX:
+==============
+
+Issue #1:
+---------
+Description: map doesn't work at all - it should be zooming in on the diagram and showing a translucent blue rectangle on the current user position 
+Screenshot: screenshots/map off.png
+Priority: [ x] High  [ ] Medium  [ ] Low
+Location: probably app.js
+Notes: we could just keep it under the small button and make it available only per user clicking, not by default 
+
+
+Issue #2:
+---------
+Description: the outline is off, needs complete switch off. I also don't like how the buttons are popping out, reconsider this animation. 
+Screenshot: screenshots/outline.png, screenshots/weird bounce.png
+Priority: [ x] High  [ ] Medium  [ ] Low
+Location: probably app.js too
+Notes: very important, this bug causes this app to be really unpleasant to use 
+
+
+Issue #3:
+---------
+Description: the dark mode glitch - there's always a place with white bg on the map - probably it has something to do with my export from draw io - i went over the limits of the resolution. needs a way to be resolved 
+Screenshot: screenshots/white bg.png
+Priority: [ ] High  [ x] Medium  [ ] Low
+Location:
+Notes:
+
+Issue #4
+---------
+Description: mobile fixes - the menu should be a hamburger menu type icon unrolling from the upper right corner, the title should fit in place, the button logic needs to be double checked and the best possible mobile version should be produced. 
+the dev mode notification could be closeable too. 
+Screenshot: screenshots/menu.png
+Priority: [ ] High  [ ] Medium  [x ] Low
+Location:
+Notes:
+
+
+FEATURE REQUESTS:
+=================
+
+Feature #1:
+-----------
+Description:
+Screenshot:
+Priority: [ ] High  [ ] Medium  [ ] Low
+Notes:
+
+
+NOTES & OBSERVATIONS:
+=====================
+(Add any general observations or thoughts here)
+
+

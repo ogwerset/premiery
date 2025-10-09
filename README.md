@@ -2,7 +2,7 @@
 
 A professional, corporate-grade interactive web viewer for workflow diagrams. Built with pure HTML/CSS/JavaScript - no build process required.
 
-![Version](https://img.shields.io/badge/version-1.4.0.1-blue)
+![Version](https://img.shields.io/badge/version-1.4.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🚀 Live Demo
@@ -324,7 +324,29 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and detailed changes.
 
 ---
 
-**Current Version**: v1.4.0.1 | **Last Updated**: 2025-10-09
+**Current Version**: v1.4.1 | **Last Updated**: 2025-10-09
+
+## 🎨 New in v1.4.1
+
+- 🎨 **UX Improvements** - Enhanced user experience
+  - Removed distracting outline from selected nodes (kept glow effect only)
+  - Eliminated button bounce animations for smoother interactions
+  - Minimap now initializes automatically on load
+  - Added debug logging for minimap troubleshooting
+- 🌙 **Dark Mode Fixes** - Enhanced dark mode compatibility
+  - Force SVG backgrounds to respect dark mode (!important rules)
+  - Override white fill rectangles in SVG for dark mode
+  - Fixed minimap SVG backgrounds in dark mode
+  - Added overflow handling to prevent white edges
+- 📱 **Mobile Enhancements** - Better mobile experience
+  - Added hamburger menu for mobile devices (slide-out panel)
+  - All toolbar controls accessible via mobile menu
+  - Dev mode notification now closeable with × button
+  - Improved mobile layout and button spacing
+- 🐛 **Bug Fixes**
+  - Fixed minimap viewport tracking and positioning
+  - Enhanced error handling in minimap initialization
+  - Improved mobile menu auto-close behavior
 
 ## 🎨 New in v1.4.0.1
 
