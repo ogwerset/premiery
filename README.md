@@ -2,7 +2,7 @@
 
 A professional, corporate-grade interactive web viewer for workflow diagrams. Built with pure HTML/CSS/JavaScript - no build process required.
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🚀 Live Demo
@@ -324,7 +324,15 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and detailed changes.
 
 ---
 
-**Current Version**: v1.4.0 | **Last Updated**: 2025-10-09
+**Current Version**: v1.4.0.1 | **Last Updated**: 2025-10-09
+
+## 🎨 New in v1.4.0.1
+
+- 🐛 **Hotfix** - Improved sidebar close button
+  - Added z-index to ensure button stays on top
+  - Added event handler with preventDefault/stopPropagation
+  - Enhanced click event handling for better reliability
+  - Added debug logging for troubleshooting
 
 ## 🎨 New in v1.4.0
 

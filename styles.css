@@ -377,6 +377,7 @@ body.view-mode .sidebar-header {
     padding: 4px 8px;
     border-radius: 4px;
     transition: all 0.15s;
+    z-index: 1000;
 }
 
 .close-btn:hover {
@@ -997,6 +998,8 @@ body.view-mode #sidebar-content #node-id {
         min-height: 44px;
         top: 12px;
         right: 12px;
+        z-index: 1001;
+        pointer-events: auto;
     }
 
     /* Form inputs */

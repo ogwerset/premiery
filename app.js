@@ -400,6 +400,8 @@ function toggleSidebar() {
  * Close sidebar and cleanup
  */
 function closeSidebar() {
+    console.log('closeSidebar called');
+
     // Remove selection from node
     if (state.selectedElement) {
         state.selectedElement.classList.remove('node-selected');
@@ -414,6 +416,8 @@ function closeSidebar() {
     `;
     state.currentNodeId = null;
     state.selectedElement = null;
+
+    console.log('Sidebar closed successfully');
 }
 
 /**
@@ -1042,7 +1046,18 @@ function initInfoBanner() {
 function setupEventListeners() {
     // Sidebar controls
     document.getElementById('toggle-sidebar-btn').addEventListener('click', toggleSidebar);
-    document.querySelector('.close-btn').addEventListener('click', closeSidebar);
+
+    const closeBtn = document.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeSidebar();
+        });
+        console.log('Close button event listener attached successfully');
+    } else {
+        console.error('Close button not found in DOM');
+    }
 
     // Save button
     document.querySelector('.button-group .btn-primary').addEventListener('click', saveNodeData);

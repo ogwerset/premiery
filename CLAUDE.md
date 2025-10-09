@@ -1,1 +1,2 @@
 - remember the details of what we did and how the app works so we can work on some more project
+- remember to read and update the readme each time and push the changes to git
