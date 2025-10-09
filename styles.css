@@ -916,6 +916,13 @@ body.view-mode #sidebar-content #node-id {
     display: none;
 }
 
+/* Desktop: toolbar-controls should display normally */
+.toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 /* ================================================
    MOBILE STYLES SECTION
    ================================================ */
