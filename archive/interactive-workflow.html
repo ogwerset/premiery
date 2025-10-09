@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Workflow Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+        }
+
+        #main-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        #svg-container {
+            flex: 1;
+            position: relative;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        #svg-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: white;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebar.hidden {
+            display: none;
+        }
+
+        .sidebar-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1BA1E2;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .links-list, .files-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .link-item, .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .link-item a {
+            color: #1BA1E2;
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1BA1E2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1589C9;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .add-link-form, .add-file-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .add-link-form input, .add-file-form input {
+            flex: 1;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .info-banner {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .info-banner h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .info-banner p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        /* Clickable node styling */
+        svg g[id]:not([id="0"]):not([id="1"]) {
+            cursor: pointer;
+        }
+
+        svg g[id]:not([id="0"]):not([id="1"]):hover {
+            opacity: 0.8;
+        }
+
+        .node-highlight {
+            stroke: #FF6B6B !important;
+            stroke-width: 3 !important;
+            filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6));
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="svg-container">
+            <div class="controls">
+                <button class="btn btn-primary btn-small" onclick="zoomIn()">Zoom In (+)</button>
+                <button class="btn btn-primary btn-small" onclick="zoomOut()">Zoom Out (-)</button>
+                <button class="btn btn-secondary btn-small" onclick="resetZoom()">Reset View</button>
+            </div>
+
+            <div class="info-banner">
+                <h3>Interactive Workflow</h3>
+                <p>🖱️ Click on any node to edit</p>
+                <p>🔍 Use mouse wheel to zoom</p>
+                <p>✋ Drag to pan around</p>
+            </div>
+
+            <div id="svg-wrapper">
+                <!-- SVG will be loaded here -->
+            </div>
+        </div>
+
+        <div id="sidebar">
+            <button class="close-btn" onclick="closeSidebar()">&times;</button>
+            <div class="sidebar-header">
+                <h2 id="node-title">Node Details</h2>
+                <p id="node-id"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="node-name">Node Name</label>
+                <input type="text" id="node-name" placeholder="Enter node name">
+            </div>
+
+            <div class="form-group">
+                <label for="node-description">Description</label>
+                <textarea id="node-description" placeholder="Add a description for this node"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Attached Links</label>
+                <ul class="links-list" id="links-list"></ul>
+                <div class="add-link-form">
+                    <input type="text" id="new-link-url" placeholder="Enter URL">
+                    <button class="btn btn-primary btn-small" onclick="addLink()">Add</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Attached Files</label>
+                <ul class="files-list" id="files-list"></ul>
+                <div class="add-file-form">
+                    <input type="text" id="new-file-name" placeholder="File name or path">
+                    <button class="btn btn-primary btn-small" onclick="addFile()">Add</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveNodeData()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeSidebar()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let panZoomInstance = null;
+        let currentNodeId = null;
+        let nodeData = {};
+        let selectedElement = null;
+
+        // Load node data from localStorage
+        function loadNodeData() {
+            const saved = localStorage.getItem('workflowNodeData');
+            if (saved) {
+                nodeData = JSON.parse(saved);
+            }
+        }
+
+        // Save node data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('workflowNodeData', JSON.stringify(nodeData));
+        }
+
+        // Load and display SVG
+        async function loadSVG() {
+            try {
+                const response = await fetch('flowchart-newexport/flowchart-processed.svg');
+                const svgText = await response.text();
+                document.getElementById('svg-wrapper').innerHTML = svgText;
+
+                // Initialize pan-zoom after SVG is loaded
+                setTimeout(() => {
+                    const svgElement = document.querySelector('#svg-wrapper svg');
+                    if (svgElement) {
+                        panZoomInstance = svgPanZoom(svgElement, {
+                            zoomEnabled: true,
+                            controlIconsEnabled: false,
+                            fit: true,
+                            center: true,
+                            minZoom: 0.1,
+                            maxZoom: 10
+                        });
+
+                        // Make nodes clickable
+                        makeNodesClickable();
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error loading SVG:', error);
+                document.getElementById('svg-wrapper').innerHTML =
+                    '<div class="empty-state"><p>Error loading diagram. Please ensure the SVG file is in the correct location.</p></div>';
+            }
+        }
+
+        // Make all nodes clickable
+        function makeNodesClickable() {
+            const svgElement = document.querySelector('#svg-wrapper svg');
+            if (!svgElement) return;
+
+            // Find all groups with IDs (these are the nodes)
+            const nodes = svgElement.querySelectorAll('g[id]');
+
+            nodes.forEach(node => {
+                const nodeId = node.getAttribute('id');
+                // Skip root nodes
+                if (nodeId === '0' || nodeId === '1') return;
+
+                // Check if this node has visible content (shapes, text, etc.)
+                const hasContent = node.querySelector('rect, ellipse, path, text, image');
+                if (!hasContent) return;
+
+                node.style.cursor = 'pointer';
+                node.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openNodeEditor(nodeId, node);
+                });
+            });
+        }
+
+        // Open node editor sidebar
+        function openNodeEditor(nodeId, element) {
+            currentNodeId = nodeId;
+            selectedElement = element;
+
+            // Highlight selected node
+            document.querySelectorAll('.node-highlight').forEach(el => {
+                el.classList.remove('node-highlight');
+            });
+
+            const shape = element.querySelector('rect, ellipse, path:not([d*="M 0 0"])');
+            if (shape) {
+                shape.classList.add('node-highlight');
+            }
+
+            // Get node text content
+            const textElement = element.querySelector('text');
+            const nodeText = textElement ? textElement.textContent.trim() : 'Unnamed Node';
+
+            // Load existing data or create new
+            if (!nodeData[nodeId]) {
+                nodeData[nodeId] = {
+                    name: nodeText,
+                    description: '',
+                    links: [],
+                    files: []
+                };
+            }
+
+            // Populate form
+            document.getElementById('node-title').textContent = nodeText;
+            document.getElementById('node-id').textContent = `ID: ${nodeId}`;
+            document.getElementById('node-name').value = nodeData[nodeId].name;
+            document.getElementById('node-description').value = nodeData[nodeId].description;
+
+            // Populate links
+            renderLinks();
+
+            // Populate files
+            renderFiles();
+
+            // Open sidebar
+            document.getElementById('sidebar').classList.add('open');
+        }
+
+        // Close sidebar
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+
+            // Remove highlight
+            document.querySelectorAll('.node-highlight').forEach(el => {
+                el.classList.remove('node-highlight');
+            });
+
+            currentNodeId = null;
+            selectedElement = null;
+        }
+
+        // Save node data
+        function saveNodeData() {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].name = document.getElementById('node-name').value;
+            nodeData[currentNodeId].description = document.getElementById('node-description').value;
+
+            saveToLocalStorage();
+
+            // Show feedback
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saved!';
+            saveBtn.style.background = '#28a745';
+
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.background = '';
+            }, 1500);
+        }
+
+        // Render links list
+        function renderLinks() {
+            const linksList = document.getElementById('links-list');
+            const links = nodeData[currentNodeId].links;
+
+            if (links.length === 0) {
+                linksList.innerHTML = '<li class="empty-state">No links attached</li>';
+                return;
+            }
+
+            linksList.innerHTML = links.map((link, index) => `
+                <li class="link-item">
+                    <a href="${link}" target="_blank">${link}</a>
+                    <button class="btn btn-danger btn-small" onclick="removeLink(${index})">Remove</button>
+                </li>
+            `).join('');
+        }
+
+        // Add link
+        function addLink() {
+            if (!currentNodeId) return;
+
+            const urlInput = document.getElementById('new-link-url');
+            const url = urlInput.value.trim();
+
+            if (!url) return;
+
+            // Add http:// if no protocol specified
+            const fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
+
+            nodeData[currentNodeId].links.push(fullUrl);
+            urlInput.value = '';
+
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Remove link
+        function removeLink(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].links.splice(index, 1);
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Render files list
+        function renderFiles() {
+            const filesList = document.getElementById('files-list');
+            const files = nodeData[currentNodeId].files;
+
+            if (files.length === 0) {
+                filesList.innerHTML = '<li class="empty-state">No files attached</li>';
+                return;
+            }
+
+            filesList.innerHTML = files.map((file, index) => `
+                <li class="file-item">
+                    <span>${file}</span>
+                    <button class="btn btn-danger btn-small" onclick="removeFile(${index})">Remove</button>
+                </li>
+            `).join('');
+        }
+
+        // Add file
+        function addFile() {
+            if (!currentNodeId) return;
+
+            const fileInput = document.getElementById('new-file-name');
+            const fileName = fileInput.value.trim();
+
+            if (!fileName) return;
+
+            nodeData[currentNodeId].files.push(fileName);
+            fileInput.value = '';
+
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Remove file
+        function removeFile(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].files.splice(index, 1);
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Zoom controls
+        function zoomIn() {
+            if (panZoomInstance) {
+                panZoomInstance.zoomIn();
+            }
+        }
+
+        function zoomOut() {
+            if (panZoomInstance) {
+                panZoomInstance.zoomOut();
+            }
+        }
+
+        function resetZoom() {
+            if (panZoomInstance) {
+                panZoomInstance.reset();
+                panZoomInstance.fit();
+                panZoomInstance.center();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+            if (e.key === '+' || e.key === '=') {
+                zoomIn();
+            }
+            if (e.key === '-') {
+                zoomOut();
+            }
+            if (e.key === '0') {
+                resetZoom();
+            }
+        });
+
+        // Initialize
+        loadNodeData();
+        loadSVG();
+    </script>
+</body>
+</html>

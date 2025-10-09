@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Workflow Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+        }
+
+        #main-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        #svg-container {
+            flex: 1;
+            position: relative;
+            background: #f5f5f5;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #svg-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: white;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1BA1E2;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .links-list, .files-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .link-item, .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .link-item a {
+            color: #1BA1E2;
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1BA1E2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1589C9;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .add-link-form, .add-file-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .add-link-form input, .add-file-form input {
+            flex: 1;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .info-banner {
+            position: absolute;
+            top: 20px;
+            right: 380px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .info-banner h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .info-banner p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+
+        #zoom-level {
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 12px;
+            min-width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div id="svg-container">
+            <div class="info-banner">
+                <h3>Interactive Workflow</h3>
+                <p>🖱️ Click "Select Node" then click a node to edit</p>
+                <p>🔍 Use zoom controls below</p>
+                <p>👁️ Scroll to view full diagram</p>
+            </div>
+
+            <div class="zoom-controls">
+                <button class="btn btn-primary btn-small" onclick="zoomIn()">+</button>
+                <div id="zoom-level">100%</div>
+                <button class="btn btn-primary btn-small" onclick="zoomOut()">-</button>
+                <button class="btn btn-secondary btn-small" onclick="resetZoom()">Reset</button>
+                <button class="btn btn-secondary btn-small" id="select-mode-btn" onclick="toggleSelectMode()">Select Node</button>
+            </div>
+
+            <iframe id="svg-frame" src="flowchart-newexport/flowchart-processed.svg"></iframe>
+        </div>
+
+        <div id="sidebar">
+            <button class="close-btn" onclick="closeSidebar()">&times;</button>
+            <div class="sidebar-header">
+                <h2 id="node-title">Node Details</h2>
+                <p id="node-id"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="node-name">Node Name</label>
+                <input type="text" id="node-name" placeholder="Enter node name">
+            </div>
+
+            <div class="form-group">
+                <label for="node-description">Description</label>
+                <textarea id="node-description" placeholder="Add a description for this node"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Attached Links</label>
+                <ul class="links-list" id="links-list"></ul>
+                <div class="add-link-form">
+                    <input type="text" id="new-link-url" placeholder="Enter URL">
+                    <button class="btn btn-primary btn-small" onclick="addLink()">Add</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Attached Files</label>
+                <ul class="files-list" id="files-list"></ul>
+                <div class="add-file-form">
+                    <input type="text" id="new-file-name" placeholder="File name or path">
+                    <button class="btn btn-primary btn-small" onclick="addFile()">Add</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveNodeData()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeSidebar()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentNodeId = null;
+        let nodeData = {};
+        let selectMode = false;
+        let zoomLevel = 1;
+        let svgDoc = null;
+
+        // Load node data from localStorage
+        function loadNodeData() {
+            const saved = localStorage.getItem('workflowNodeData');
+            if (saved) {
+                nodeData = JSON.parse(saved);
+            }
+        }
+
+        // Save node data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('workflowNodeData', JSON.stringify(nodeData));
+        }
+
+        // Initialize iframe
+        document.getElementById('svg-frame').addEventListener('load', function() {
+            try {
+                svgDoc = this.contentDocument || this.contentWindow.document;
+                makeNodesClickable();
+            } catch (e) {
+                console.error('Error accessing SVG:', e);
+            }
+        });
+
+        // Toggle select mode
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            const btn = document.getElementById('select-mode-btn');
+            if (selectMode) {
+                btn.textContent = 'Cancel Select';
+                btn.style.background = '#dc3545';
+            } else {
+                btn.textContent = 'Select Node';
+                btn.style.background = '';
+            }
+        }
+
+        // Make all nodes clickable
+        function makeNodesClickable() {
+            if (!svgDoc) return;
+
+            const nodes = svgDoc.querySelectorAll('g[id]');
+
+            nodes.forEach(node => {
+                const nodeId = node.getAttribute('id');
+                if (nodeId === '0' || nodeId === '1') return;
+
+                const hasContent = node.querySelector('rect, ellipse, path, text, image');
+                if (!hasContent) return;
+
+                node.style.cursor = 'pointer';
+                node.addEventListener('click', (e) => {
+                    if (selectMode) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        openNodeEditor(nodeId, node);
+                        selectMode = false;
+                        document.getElementById('select-mode-btn').textContent = 'Select Node';
+                        document.getElementById('select-mode-btn').style.background = '';
+                    }
+                });
+            });
+        }
+
+        // Open node editor sidebar
+        function openNodeEditor(nodeId, element) {
+            currentNodeId = nodeId;
+
+            // Get node text content
+            const textElement = element.querySelector('text');
+            const nodeText = textElement ? textElement.textContent.trim() : 'Unnamed Node';
+
+            // Load existing data or create new
+            if (!nodeData[nodeId]) {
+                nodeData[nodeId] = {
+                    name: nodeText,
+                    description: '',
+                    links: [],
+                    files: []
+                };
+            }
+
+            // Populate form
+            document.getElementById('node-title').textContent = nodeText;
+            document.getElementById('node-id').textContent = `ID: ${nodeId}`;
+            document.getElementById('node-name').value = nodeData[nodeId].name;
+            document.getElementById('node-description').value = nodeData[nodeId].description;
+
+            renderLinks();
+            renderFiles();
+
+            document.getElementById('sidebar').classList.add('open');
+        }
+
+        // Close sidebar
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            currentNodeId = null;
+        }
+
+        // Save node data
+        function saveNodeData() {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].name = document.getElementById('node-name').value;
+            nodeData[currentNodeId].description = document.getElementById('node-description').value;
+
+            saveToLocalStorage();
+
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saved!';
+            saveBtn.style.background = '#28a745';
+
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.background = '';
+            }, 1500);
+        }
+
+        // Render links list
+        function renderLinks() {
+            const linksList = document.getElementById('links-list');
+            const links = nodeData[currentNodeId].links;
+
+            if (links.length === 0) {
+                linksList.innerHTML = '<li class="empty-state">No links attached</li>';
+                return;
+            }
+
+            linksList.innerHTML = links.map((link, index) => `
+                <li class="link-item">
+                    <a href="${link}" target="_blank">${link}</a>
+                    <button class="btn btn-danger btn-small" onclick="removeLink(${index})">Remove</button>
+                </li>
+            `).join('');
+        }
+
+        // Add link
+        function addLink() {
+            if (!currentNodeId) return;
+
+            const urlInput = document.getElementById('new-link-url');
+            const url = urlInput.value.trim();
+
+            if (!url) return;
+
+            const fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
+
+            nodeData[currentNodeId].links.push(fullUrl);
+            urlInput.value = '';
+
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Remove link
+        function removeLink(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].links.splice(index, 1);
+            renderLinks();
+            saveToLocalStorage();
+        }
+
+        // Render files list
+        function renderFiles() {
+            const filesList = document.getElementById('files-list');
+            const files = nodeData[currentNodeId].files;
+
+            if (files.length === 0) {
+                filesList.innerHTML = '<li class="empty-state">No files attached</li>';
+                return;
+            }
+
+            filesList.innerHTML = files.map((file, index) => `
+                <li class="file-item">
+                    <span>${file}</span>
+                    <button class="btn btn-danger btn-small" onclick="removeFile(${index})">Remove</button>
+                </li>
+            `).join('');
+        }
+
+        // Add file
+        function addFile() {
+            if (!currentNodeId) return;
+
+            const fileInput = document.getElementById('new-file-name');
+            const fileName = fileInput.value.trim();
+
+            if (!fileName) return;
+
+            nodeData[currentNodeId].files.push(fileName);
+            fileInput.value = '';
+
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Remove file
+        function removeFile(index) {
+            if (!currentNodeId) return;
+
+            nodeData[currentNodeId].files.splice(index, 1);
+            renderFiles();
+            saveToLocalStorage();
+        }
+
+        // Zoom controls
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.1, 3);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.1, 0.3);
+            applyZoom();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            if (svgDoc) {
+                const svg = svgDoc.querySelector('svg');
+                if (svg) {
+                    svg.style.transform = `scale(${zoomLevel})`;
+                    svg.style.transformOrigin = 'top left';
+                }
+            }
+            document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSidebar();
+                if (selectMode) {
+                    selectMode = false;
+                    document.getElementById('select-mode-btn').textContent = 'Select Node';
+                    document.getElementById('select-mode-btn').style.background = '';
+                }
+            }
+            if (e.key === '+' || e.key === '=') {
+                zoomIn();
+            }
+            if (e.key === '-') {
+                zoomOut();
+            }
+            if (e.key === '0') {
+                resetZoom();
+            }
+        });
+
+        // Initialize
+        loadNodeData();
+    </script>
+</body>
+</html>
