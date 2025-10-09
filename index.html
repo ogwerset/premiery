@@ -16,21 +16,21 @@
 </head>
 <body>
     <div id="main-container">
-        <div id="svg-container">
-            <div class="toolbar">
+        <div id="svg-container" role="main" aria-label="Interactive workflow diagram viewer">
+            <div class="toolbar" role="banner">
                 <div class="toolbar-left">
                     <div class="toolbar-title">Workflow Diagram</div>
-                    <span style="font-size: 12px; color: var(--text-tertiary); margin-left: 8px;">v1.4.1</span>
+                    <span style="font-size: 12px; color: var(--text-tertiary); margin-left: 8px;">v1.5.0</span>
                 </div>
                 <div class="toolbar-right">
                     <!-- Mobile hamburger menu -->
-                    <button class="btn btn-secondary btn-small mobile-menu-toggle" id="mobile-menu-toggle">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <button class="btn btn-secondary btn-small mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
 
-                    <div class="toolbar-controls">
+                    <div class="toolbar-controls" role="toolbar" aria-label="Diagram controls">
                         <!-- Export/Import buttons -->
                         <button class="btn btn-secondary btn-small" id="export-btn" title="Eksportuj dane do pliku JSON" style="display: none;">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
@@ -46,25 +46,25 @@
                         </button>
                         <input type="file" id="import-file-input" accept=".json" />
 
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" title="Pomniejsz (-)">−</button>
-                            <div id="zoom-level">100%</div>
-                            <button class="zoom-btn" title="Powiększ (+)">+</button>
-                            <button class="btn btn-secondary btn-small" title="Resetuj widok (0)">Reset</button>
+                        <div class="zoom-controls" role="group" aria-label="Zoom controls">
+                            <button class="zoom-btn" title="Pomniejsz (-)" aria-label="Zoom out">−</button>
+                            <div id="zoom-level" aria-live="polite" aria-atomic="true">100%</div>
+                            <button class="zoom-btn" title="Powiększ (+)" aria-label="Zoom in">+</button>
+                            <button class="btn btn-secondary btn-small" title="Resetuj widok (0)" aria-label="Reset view">Reset</button>
                         </div>
-                        <button class="btn btn-secondary btn-small" id="dark-mode-toggle" title="Przełącz tryb ciemny/jasny">
-                            <svg id="dark-mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <button class="btn btn-secondary btn-small" id="dark-mode-toggle" title="Przełącz tryb ciemny/jasny" aria-label="Toggle dark mode" aria-pressed="false">
+                            <svg id="dark-mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                             </svg>
                         </button>
-                        <button class="btn btn-secondary btn-small" id="mode-toggle-btn" title="Przełącz między trybem edycji a widoku">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <button class="btn btn-secondary btn-small" id="mode-toggle-btn" title="Przełącz między trybem edycji a widoku" aria-label="Toggle edit mode" aria-pressed="false">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span id="mode-label">Tryb Dev</span>
                         </button>
-                        <button class="btn btn-primary btn-small" id="toggle-sidebar-btn">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button class="btn btn-primary btn-small" id="toggle-sidebar-btn" aria-label="Toggle node details sidebar" aria-expanded="false">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
                             <span>Szczegóły węzła</span>
@@ -96,16 +96,16 @@
             </div>
 
             <!-- Minimap -->
-            <div class="minimap" id="minimap">
+            <div class="minimap" id="minimap" role="region" aria-label="Diagram minimap">
                 <div class="minimap-header">
                     <span class="minimap-title">Mapa</span>
-                    <button class="minimap-close">&times;</button>
+                    <button class="minimap-close" aria-label="Close minimap">&times;</button>
                 </div>
-                <div class="minimap-container" id="minimap-container">
-                    <div class="minimap-viewport" id="minimap-viewport"></div>
+                <div class="minimap-container" id="minimap-container" aria-label="Minimap overview">
+                    <div class="minimap-viewport" id="minimap-viewport" role="img" aria-label="Current viewport indicator"></div>
                 </div>
             </div>
-            <button class="minimap-toggle" id="minimap-toggle">🗺️ Mapa</button>
+            <button class="minimap-toggle" id="minimap-toggle" aria-label="Toggle minimap" aria-expanded="false">🗺️ Mapa</button>
 
             <div id="content-wrapper">
                 <div id="svg-wrapper">
@@ -117,12 +117,12 @@
             </div>
         </div>
 
-        <div id="sidebar">
+        <div id="sidebar" role="complementary" aria-label="Node details panel" aria-hidden="true">
             <div id="sidebar-content">
-                <button class="close-btn">&times;</button>
+                <button class="close-btn" aria-label="Close sidebar">&times;</button>
                 <div class="sidebar-header">
                     <h2 id="node-title">Wybierz węzeł</h2>
-                    <p id="node-id">Kliknij dowolny węzeł na diagramie, aby edytować</p>
+                    <p id="node-id" aria-live="polite">Kliknij dowolny węzeł na diagramie, aby edytować</p>
                 </div>
 
                 <div class="sidebar-section">

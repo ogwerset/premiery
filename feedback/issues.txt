@@ -54,9 +54,9 @@ FEATURE REQUESTS:
 
 Feature #1:
 -----------
-Description:
+Description: best  mobile optimization
 Screenshot:
-Priority: [ ] High  [ ] Medium  [ ] Low
+Priority: [x ] High  [ ] Medium  [ ] Low
 Notes:
 
 

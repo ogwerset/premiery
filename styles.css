@@ -1,6 +1,6 @@
 /* ================================================
    Interactive Workflow Diagram - Styles
-   Version: 1.4.1 (UX/Mobile Improvements + Bug Fixes)
+   Version: 1.5.0 (Accessibility + Production Build)
    ================================================ */
 
 /* CSS Variables - Theme Colors */
@@ -328,6 +328,11 @@ body.view-mode .sidebar-header {
     font-weight: 500;
     transition: all 0.15s;
     font-family: inherit;
+}
+
+.btn:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
 .btn-primary {
@@ -687,6 +692,17 @@ body.view-mode .dev-mode-indicator {
 #svg-wrapper svg .node-interactive:hover {
     opacity: 0.85;
     filter: drop-shadow(0 0 8px rgba(27, 161, 226, 0.6));
+}
+
+#svg-wrapper svg .node-interactive:focus {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 12px rgba(27, 161, 226, 0.9));
+    outline: 3px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+#svg-wrapper svg .node-interactive:focus:not(:focus-visible) {
+    outline: none;
 }
 
 #svg-wrapper svg .node-interactive:active {

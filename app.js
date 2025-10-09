@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.4.1 (UX/Mobile Improvements + Bug Fixes)
+ * Version: 1.5.0 (Accessibility + Production Build)
  */
 
 // ================================================
@@ -281,7 +281,7 @@ function enablePinchZoom(svgElement) {
 }
 
 /**
- * Make all nodes clickable with touch support
+ * Make all nodes clickable with touch support and keyboard navigation
  */
 function makeNodesClickable() {
     const svgElement = document.querySelector('#svg-wrapper svg');
@@ -289,7 +289,7 @@ function makeNodesClickable() {
 
     const nodes = svgElement.querySelectorAll('g[data-cell-id]');
 
-    nodes.forEach(node => {
+    nodes.forEach((node, index) => {
         const nodeId = node.getAttribute('data-cell-id');
         if (nodeId === '0' || nodeId === '1') return;
 
@@ -299,10 +299,24 @@ function makeNodesClickable() {
         // Mark as interactive for CSS styling
         node.classList.add('node-interactive');
 
+        // Make keyboard accessible
+        node.setAttribute('role', 'button');
+        node.setAttribute('tabindex', '0');
+        node.setAttribute('aria-label', `Workflow node ${nodeId}`);
+
         // Click handler for desktop
         node.addEventListener('click', (e) => {
             e.stopPropagation();
             openNodeEditor(nodeId, node);
+        });
+
+        // Keyboard navigation
+        node.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                openNodeEditor(nodeId, node);
+            }
         });
 
         // Touch support for mobile highlighting
@@ -337,6 +351,7 @@ function openNodeEditor(nodeId, element) {
     // Remove selection from previously selected node
     if (state.selectedElement) {
         state.selectedElement.classList.remove('node-selected');
+        state.selectedElement.removeAttribute('aria-selected');
     }
 
     state.currentNodeId = nodeId;
@@ -345,6 +360,7 @@ function openNodeEditor(nodeId, element) {
     // Add selection to new node
     if (state.selectedElement) {
         state.selectedElement.classList.add('node-selected');
+        state.selectedElement.setAttribute('aria-selected', 'true');
     }
 
     // Get node text content
@@ -391,8 +407,10 @@ function toggleSidebar() {
         closeSidebar();
     } else {
         elements.sidebar.classList.add('open');
+        elements.sidebar.setAttribute('aria-hidden', 'false');
+        elements.toggleSidebarBtn.setAttribute('aria-expanded', 'true');
         elements.toggleSidebarBtn.innerHTML = `
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
             <span>Close Panel</span>
@@ -409,11 +427,14 @@ function closeSidebar() {
     // Remove selection from node
     if (state.selectedElement) {
         state.selectedElement.classList.remove('node-selected');
+        state.selectedElement.removeAttribute('aria-selected');
     }
 
     elements.sidebar.classList.remove('open');
+    elements.sidebar.setAttribute('aria-hidden', 'true');
+    elements.toggleSidebarBtn.setAttribute('aria-expanded', 'false');
     elements.toggleSidebarBtn.innerHTML = `
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
         </svg>
         <span>Szczegóły węzła</span>
@@ -630,6 +651,12 @@ function toggleDarkMode() {
     localStorage.setItem('darkMode', isDarkMode);
     updateDarkModeIcon(isDarkMode);
     updateSvgBackground(isDarkMode);
+
+    // Update ARIA state
+    const darkModeBtn = document.getElementById('dark-mode-toggle');
+    if (darkModeBtn) {
+        darkModeBtn.setAttribute('aria-pressed', isDarkMode.toString());
+    }
 }
 
 /**
@@ -1003,6 +1030,9 @@ function toggleMinimap() {
     const isHidden = elements.minimap.classList.toggle('hidden');
     localStorage.setItem('minimapHidden', isHidden);
 
+    // Update ARIA state
+    elements.minimapToggle.setAttribute('aria-expanded', (!isHidden).toString());
+
     if (isHidden) {
         elements.minimapToggle.classList.remove('with-minimap');
     } else {
@@ -1091,8 +1121,15 @@ function initDevModeIndicator() {
  */
 function toggleMobileMenu() {
     const toolbarControls = document.querySelector('.toolbar-controls');
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+
     if (toolbarControls) {
-        toolbarControls.classList.toggle('open');
+        const isOpen = toolbarControls.classList.toggle('open');
+
+        // Update ARIA state
+        if (mobileMenuToggle) {
+            mobileMenuToggle.setAttribute('aria-expanded', isOpen.toString());
+        }
     }
 }
 
