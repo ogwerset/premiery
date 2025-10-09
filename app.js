@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.3.0 (Optimized)
+ * Version: 1.3.2 (UI/UX Enhancements)
  */
 
 // ================================================
@@ -185,6 +185,9 @@ async function loadSVG() {
             if (svgElement) {
                 initializePanZoom(svgElement);
                 makeNodesClickable();
+                // Apply dark mode background if enabled
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                updateSvgBackground(isDarkMode);
             }
         }, CONSTANTS.SVG_INIT_DELAY);
     } catch (error) {
@@ -554,6 +557,7 @@ function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
     localStorage.setItem('darkMode', isDarkMode);
     updateDarkModeIcon(isDarkMode);
+    updateSvgBackground(isDarkMode);
 }
 
 /**
@@ -570,6 +574,30 @@ function updateDarkModeIcon(isDarkMode) {
 }
 
 /**
+ * Update SVG background color for dark mode
+ */
+function updateSvgBackground(isDarkMode) {
+    const svgElement = document.querySelector('#svg-wrapper svg');
+    if (svgElement) {
+        if (isDarkMode) {
+            svgElement.style.background = 'var(--bg-secondary)';
+        } else {
+            svgElement.style.background = 'white';
+        }
+    }
+
+    // Also update minimap SVG
+    const minimapSvg = elements.minimapContainer?.querySelector('svg');
+    if (minimapSvg) {
+        if (isDarkMode) {
+            minimapSvg.style.background = 'var(--bg-tertiary)';
+        } else {
+            minimapSvg.style.background = 'white';
+        }
+    }
+}
+
+/**
  * Initialize dark mode with system preference detection
  */
 function initDarkMode() {
@@ -579,6 +607,7 @@ function initDarkMode() {
         if (savedDarkMode === 'true') {
             document.body.classList.add('dark-mode');
             updateDarkModeIcon(true);
+            updateSvgBackground(true);
         }
     } else {
         // Check system preference
@@ -586,6 +615,7 @@ function initDarkMode() {
             document.body.classList.add('dark-mode');
             localStorage.setItem('darkMode', 'true');
             updateDarkModeIcon(true);
+            updateSvgBackground(true);
         }
     }
 
@@ -596,9 +626,11 @@ function initDarkMode() {
                 if (e.matches) {
                     document.body.classList.add('dark-mode');
                     updateDarkModeIcon(true);
+                    updateSvgBackground(true);
                 } else {
                     document.body.classList.remove('dark-mode');
                     updateDarkModeIcon(false);
+                    updateSvgBackground(false);
                 }
             }
         });
@@ -699,7 +731,10 @@ function initMinimap() {
 
     const svgWrapper = elements.svgWrapper;
     const svgElement = svgWrapper.querySelector('svg');
-    if (!svgElement) return;
+    if (!svgElement) {
+        console.warn('SVG element not found for minimap initialization');
+        return;
+    }
 
     // Clone SVG for minimap
     const svgClone = svgElement.cloneNode(true);
@@ -721,6 +756,14 @@ function initMinimap() {
     svgClone.style.width = '100%';
     svgClone.style.height = '100%';
     svgClone.style.display = 'block';
+
+    // Apply dark mode if enabled
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    if (isDarkMode) {
+        svgClone.style.background = 'var(--bg-tertiary)';
+    } else {
+        svgClone.style.background = 'white';
+    }
 
     // Insert SVG before viewport
     elements.minimapContainer.insertBefore(svgClone, elements.minimapViewport);

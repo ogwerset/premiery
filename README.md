@@ -2,7 +2,7 @@
 
 A professional, corporate-grade interactive web viewer for workflow diagrams. Built with pure HTML/CSS/JavaScript - no build process required.
 
-![Version](https://img.shields.io/badge/version-1.3.1-blue)
+![Version](https://img.shields.io/badge/version-1.3.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🚀 Live Demo
@@ -323,7 +323,25 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and detailed changes.
 
 ---
 
-**Current Version**: v1.3.1 | **Last Updated**: 2025-10-09
+**Current Version**: v1.3.2 | **Last Updated**: 2025-10-09
+
+## 🎨 New in v1.3.2
+
+- 🎨 **Enhanced UI/UX** - Cleaner, more professional interface
+  - Simplified node highlighting - opacity-based hover effect (like v1.3.0)
+  - Improved sidebar organization with better spacing and visual hierarchy
+  - Section titles with accent indicators
+  - Enhanced empty states with dashed borders
+  - Hover effects on list items
+- 🌙 **Dark Mode Fix** - SVG diagram now properly responds to dark mode
+  - Main diagram background adapts to theme
+  - Minimap background syncs with dark mode
+- 🗺️ **Minimap Fix** - Map now loads data correctly on first open
+- 🎯 **Dev/View Mode Distinction** - More prominent mode indicator
+  - Enhanced dev mode warning with workflow reminder
+  - Mode toggle button has distinctive styling (orange gradient for dev, green for view)
+  - Clear visual workflow: Export → Commit → Push
+- 📝 **Better Form Styling** - Labels and inputs with improved typography
 
 ## 🎨 New in v1.3.1
 
