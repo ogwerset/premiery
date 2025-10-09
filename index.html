@@ -74,6 +74,14 @@
                 <p>✋ Przeciągnij, aby przesunąć diagram</p>
             </div>
 
+            <div class="dev-mode-indicator" id="dev-mode-indicator">
+                <div class="dev-mode-header">
+                    <span class="dev-mode-icon">⚠️</span>
+                    <strong>Tryb Dev</strong>
+                </div>
+                <p class="dev-mode-text">Pamiętaj, aby zapisać zmiany do Git po edycji danych!</p>
+            </div>
+
             <!-- Minimap -->
             <div class="minimap" id="minimap">
                 <div class="minimap-header">
@@ -104,18 +112,21 @@
                     <p id="node-id">Kliknij dowolny węzeł na diagramie, aby edytować</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="node-name">Nazwa węzła</label>
-                    <input type="text" id="node-name" placeholder="Wprowadź nazwę węzła">
+                <div class="sidebar-section">
+                    <h3 class="section-title">Podstawowe informacje</h3>
+                    <div class="form-group">
+                        <label for="node-name">Nazwa węzła</label>
+                        <input type="text" id="node-name" placeholder="Wprowadź nazwę węzła">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="node-description">Opis</label>
+                        <textarea id="node-description" placeholder="Dodaj opis tego węzła" rows="4"></textarea>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="node-description">Opis</label>
-                    <textarea id="node-description" placeholder="Dodaj opis tego węzła"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Załączone linki</label>
+                <div class="sidebar-section">
+                    <h3 class="section-title">Załączone linki</h3>
                     <ul class="links-list" id="links-list">
                         <li class="empty-state">Wybierz węzeł, aby dodać linki</li>
                     </ul>
@@ -125,8 +136,8 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Załączone pliki</label>
+                <div class="sidebar-section">
+                    <h3 class="section-title">Załączone pliki</h3>
                     <ul class="files-list" id="files-list">
                         <li class="empty-state">Wybierz węzeł, aby dodać pliki</li>
                     </ul>

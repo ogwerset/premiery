@@ -708,9 +708,22 @@ function initMinimap() {
     svgClone.querySelectorAll('.node-interactive').forEach(node => {
         node.classList.remove('node-interactive');
         node.style.cursor = 'default';
+        node.style.pointerEvents = 'none';
     });
 
-    elements.minimapContainer.insertBefore(svgClone, elements.minimapContainer.firstChild);
+    // Remove any existing SVG from minimap
+    const existingSvg = elements.minimapContainer.querySelector('svg');
+    if (existingSvg) {
+        existingSvg.remove();
+    }
+
+    // Set proper dimensions for the cloned SVG
+    svgClone.style.width = '100%';
+    svgClone.style.height = '100%';
+    svgClone.style.display = 'block';
+
+    // Insert SVG before viewport
+    elements.minimapContainer.insertBefore(svgClone, elements.minimapViewport);
 
     // Initialize viewport rectangle
     updateMinimapViewport();
