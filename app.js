@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.5.0 (Accessibility + Production Build)
+ * Version: 1.5.1 (Final Polish & Bug Fixes)
  */
 
 // ================================================
@@ -188,10 +188,7 @@ async function loadSVG() {
                 // Apply dark mode background if enabled
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 updateSvgBackground(isDarkMode);
-                // Initialize minimap automatically after SVG is ready
-                setTimeout(() => {
-                    initMinimap();
-                }, 200);
+                // Don't auto-initialize minimap - let user trigger it
             }
         }, CONSTANTS.SVG_INIT_DELAY);
     } catch (error) {
@@ -285,19 +282,35 @@ function enablePinchZoom(svgElement) {
  */
 function makeNodesClickable() {
     const svgElement = document.querySelector('#svg-wrapper svg');
-    if (!svgElement) return;
+    if (!svgElement) {
+        console.error('SVG element not found');
+        return;
+    }
 
     const nodes = svgElement.querySelectorAll('g[data-cell-id]');
+    console.log(`Found ${nodes.length} nodes with data-cell-id`);
+
+    let interactiveCount = 0;
 
     nodes.forEach((node, index) => {
         const nodeId = node.getAttribute('data-cell-id');
-        if (nodeId === '0' || nodeId === '1') return;
 
-        const hasContent = node.querySelector('rect, ellipse, path, text, image');
-        if (!hasContent) return;
+        // Skip background/root nodes
+        if (nodeId === '0' || nodeId === '1') {
+            console.log(`Skipping node ${nodeId} (background/root)`);
+            return;
+        }
+
+        // Check if node has visible content
+        const hasContent = node.querySelector('rect, ellipse, path, text, image, polygon, polyline, circle');
+        if (!hasContent) {
+            console.log(`Node ${nodeId} has no visible content, skipping`);
+            return;
+        }
 
         // Mark as interactive for CSS styling
         node.classList.add('node-interactive');
+        interactiveCount++;
 
         // Make keyboard accessible
         node.setAttribute('role', 'button');
@@ -337,7 +350,11 @@ function makeNodesClickable() {
         node.addEventListener('touchcancel', () => {
             node.style.opacity = '';
         }, { passive: true });
+
+        console.log(`Node ${nodeId} made interactive`);
     });
+
+    console.log(`Total interactive nodes: ${interactiveCount}`);
 }
 
 // ================================================
@@ -348,6 +365,8 @@ function makeNodesClickable() {
  * Open node editor sidebar
  */
 function openNodeEditor(nodeId, element) {
+    console.log('Opening node editor for node:', nodeId);
+
     // Remove selection from previously selected node
     if (state.selectedElement) {
         state.selectedElement.classList.remove('node-selected');
@@ -363,9 +382,20 @@ function openNodeEditor(nodeId, element) {
         state.selectedElement.setAttribute('aria-selected', 'true');
     }
 
+    // Add visual feedback - sidebar content fade animation
+    const sidebarContent = elements.sidebarContent;
+    if (sidebarContent) {
+        sidebarContent.classList.add('sidebar-updating');
+        setTimeout(() => {
+            sidebarContent.classList.remove('sidebar-updating');
+        }, 300);
+    }
+
     // Get node text content
     const textElement = element.querySelector('text');
     const nodeText = textElement ? textElement.textContent.trim() : 'Nienazwany węzeł';
+
+    console.log('Node text:', nodeText);
 
     // Load existing data or create new
     if (!state.nodeData[nodeId]) {
@@ -448,7 +478,7 @@ function closeSidebar() {
 /**
  * Save node data
  */
-function saveNodeData() {
+function saveNodeData(e) {
     if (!state.currentNodeId) return;
 
     state.nodeData[state.currentNodeId].name = elements.nodeName.value;
@@ -456,15 +486,17 @@ function saveNodeData() {
 
     saveToLocalStorage();
 
-    const saveBtn = event.target;
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = '✓ Zapisano!';
-    saveBtn.style.background = '#2ecc71';
+    const saveBtn = e ? e.target : document.querySelector('.button-group .btn-primary');
+    if (saveBtn) {
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = '✓ Zapisano!';
+        saveBtn.style.background = '#2ecc71';
 
-    setTimeout(() => {
-        saveBtn.textContent = originalText;
-        saveBtn.style.background = '';
-    }, CONSTANTS.SUCCESS_MESSAGE_DURATION);
+        setTimeout(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.style.background = '';
+        }, CONSTANTS.SUCCESS_MESSAGE_DURATION);
+    }
 }
 
 // ================================================

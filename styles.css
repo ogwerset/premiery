@@ -1,6 +1,6 @@
 /* ================================================
    Interactive Workflow Diagram - Styles
-   Version: 1.5.0 (Accessibility + Production Build)
+   Version: 1.5.1 (Final Polish & Bug Fixes)
    ================================================ */
 
 /* CSS Variables - Theme Colors */
@@ -131,6 +131,11 @@ body.dark-mode #svg-wrapper svg rect[fill="#fff"] {
 
 #sidebar-content {
     padding: 24px;
+    transition: opacity 0.3s ease;
+}
+
+#sidebar-content.sidebar-updating {
+    opacity: 0.5;
 }
 
 .sidebar-header {
