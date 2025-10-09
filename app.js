@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.3.2 (UI/UX Enhancements)
+ * Version: 1.4.0 (Mobile Responsive + Touch Support)
  */
 
 // ================================================
@@ -198,7 +198,7 @@ async function loadSVG() {
 }
 
 /**
- * Initialize pan-zoom functionality with debounced updates
+ * Initialize pan-zoom functionality with debounced updates and touch support
  */
 function initializePanZoom(svgElement) {
     state.panZoomInstance = svgPanZoom(svgElement, {
@@ -209,7 +209,10 @@ function initializePanZoom(svgElement) {
         minZoom: 0.1,
         maxZoom: 5,
         zoomScaleSensitivity: 0.3,
-        mouseWheelZoomEnabled: true
+        mouseWheelZoomEnabled: true,
+        // Enable touch events for mobile
+        dblClickZoomEnabled: false, // Disable to prevent conflict with touch
+        preventMouseEventsDefault: true
     });
 
     // Debounced zoom level update
@@ -230,10 +233,51 @@ function initializePanZoom(svgElement) {
     state.panZoomInstance.setOnPan(function() {
         throttledMinimapUpdate();
     });
+
+    // Add pinch-to-zoom support for mobile
+    enablePinchZoom(svgElement);
 }
 
 /**
- * Make all nodes clickable
+ * Enable pinch-to-zoom gesture for mobile devices
+ */
+function enablePinchZoom(svgElement) {
+    let initialDistance = 0;
+    let initialZoom = 1;
+
+    svgElement.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            initialDistance = getDistance(e.touches[0], e.touches[1]);
+            initialZoom = state.panZoomInstance.getZoom();
+        }
+    }, { passive: false });
+
+    svgElement.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && state.panZoomInstance) {
+            e.preventDefault();
+            const currentDistance = getDistance(e.touches[0], e.touches[1]);
+            const scale = currentDistance / initialDistance;
+            const newZoom = initialZoom * scale;
+
+            // Apply zoom with constraints
+            const minZoom = 0.1;
+            const maxZoom = 5;
+            const constrainedZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+            state.panZoomInstance.zoom(constrainedZoom);
+        }
+    }, { passive: false });
+
+    function getDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+
+/**
+ * Make all nodes clickable with touch support
  */
 function makeNodesClickable() {
     const svgElement = document.querySelector('#svg-wrapper svg');
@@ -251,10 +295,30 @@ function makeNodesClickable() {
         // Mark as interactive for CSS styling
         node.classList.add('node-interactive');
 
+        // Click handler for desktop
         node.addEventListener('click', (e) => {
             e.stopPropagation();
             openNodeEditor(nodeId, node);
         });
+
+        // Touch support for mobile highlighting
+        node.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            node.style.opacity = '0.75';
+        }, { passive: true });
+
+        node.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setTimeout(() => {
+                node.style.opacity = '';
+                openNodeEditor(nodeId, node);
+            }, 100);
+        });
+
+        node.addEventListener('touchcancel', () => {
+            node.style.opacity = '';
+        }, { passive: true });
     });
 }
 
@@ -821,7 +885,7 @@ function updateMinimapViewport() {
 }
 
 /**
- * Make minimap viewport draggable
+ * Make minimap viewport draggable with touch support
  */
 function makeViewportDraggable() {
     const viewport = elements.minimapViewport;
@@ -844,6 +908,7 @@ function makeViewportDraggable() {
         state.panZoomInstance.pan({ x: panX, y: panY });
     }
 
+    // Mouse events for desktop
     viewport.addEventListener('mousedown', (e) => {
         isDragging = true;
         e.preventDefault();
@@ -863,6 +928,34 @@ function makeViewportDraggable() {
     document.addEventListener('mouseup', () => {
         isDragging = false;
     });
+
+    // Touch events for mobile
+    viewport.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        e.preventDefault();
+    }, { passive: false });
+
+    minimapContainer.addEventListener('touchstart', (e) => {
+        if (e.target === viewport) return;
+        const touch = e.touches[0];
+        moveViewport(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length > 0) {
+            const touch = e.touches[0];
+            moveViewport(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+        isDragging = false;
+    }, { passive: true });
+
+    document.addEventListener('touchcancel', () => {
+        isDragging = false;
+    }, { passive: true });
 }
 
 /**

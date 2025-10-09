@@ -1,6 +1,6 @@
 /* ================================================
    Interactive Workflow Diagram - Styles
-   Version: 1.3.2 (UI/UX Enhancements)
+   Version: 1.4.0 (Mobile Responsive + Touch Support)
    ================================================ */
 
 /* CSS Variables - Theme Colors */
@@ -90,7 +90,7 @@ body {
 #svg-wrapper svg {
     max-width: 100%;
     max-height: 100%;
-    background: white;
+    background: var(--bg-primary);
     transition: background-color 0.3s;
 }
 
@@ -644,15 +644,38 @@ body.view-mode .dev-mode-indicator {
 
 #svg-wrapper svg .node-interactive {
     cursor: pointer;
-    transition: opacity 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 #svg-wrapper svg .node-interactive:hover {
-    opacity: 0.7;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px rgba(27, 161, 226, 0.6));
+}
+
+#svg-wrapper svg .node-interactive:active {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 12px rgba(27, 161, 226, 0.8));
+    transform: scale(0.98);
 }
 
 #svg-wrapper svg .node-selected {
-    opacity: 0.7;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 12px rgba(27, 161, 226, 0.9));
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+body.dark-mode #svg-wrapper svg .node-interactive:hover {
+    filter: drop-shadow(0 0 10px rgba(61, 179, 245, 0.7));
+}
+
+body.dark-mode #svg-wrapper svg .node-interactive:active {
+    filter: drop-shadow(0 0 14px rgba(61, 179, 245, 0.9));
+}
+
+body.dark-mode #svg-wrapper svg .node-selected {
+    filter: drop-shadow(0 0 16px rgba(61, 179, 245, 1));
+    outline-color: var(--accent-color);
 }
 
 /* ================================================
@@ -763,7 +786,7 @@ body.view-mode .dev-mode-indicator {
     height: 100%;
     object-fit: contain;
     display: block;
-    background: white;
+    background: var(--bg-primary);
 }
 
 body.dark-mode .minimap-container svg {
@@ -848,7 +871,218 @@ body.view-mode #sidebar-content #node-id {
 
 /* ================================================
    MOBILE STYLES SECTION
-   (Reserved for Phase 2 - Mobile Implementation)
    ================================================ */
 
-/* @media queries will be added here for mobile responsiveness */
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .minimap {
+        width: 160px;
+        height: 120px;
+    }
+
+    .toolbar {
+        padding: 0 12px;
+    }
+
+    .toolbar-right {
+        gap: 8px;
+    }
+}
+
+/* Mobile phones (< 768px) */
+@media (max-width: 767px) {
+    /* Hide minimap on mobile by default */
+    .minimap {
+        display: none;
+    }
+
+    .minimap-toggle {
+        display: none;
+    }
+
+    /* Compact toolbar */
+    .toolbar {
+        height: 48px;
+        padding: 0 12px;
+    }
+
+    .toolbar-left {
+        gap: 8px;
+    }
+
+    .toolbar-title {
+        font-size: 16px;
+    }
+
+    .toolbar-left span {
+        display: none; /* Hide version number */
+    }
+
+    .toolbar-right {
+        gap: 6px;
+    }
+
+    /* Hide button text, show icons only */
+    .toolbar-right .btn span {
+        display: none;
+    }
+
+    .toolbar-right .btn {
+        padding: 8px;
+        min-width: 40px;
+    }
+
+    .toolbar-right .btn svg {
+        margin: 0;
+    }
+
+    /* Zoom controls */
+    .zoom-controls {
+        gap: 4px;
+        padding: 4px;
+    }
+
+    #zoom-level {
+        font-size: 11px;
+        min-width: 40px;
+        padding: 2px 4px;
+    }
+
+    .zoom-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    /* Full-width sidebar from bottom */
+    #sidebar {
+        width: 100vw;
+        right: auto;
+        left: 0;
+        top: auto;
+        bottom: -100vh;
+        height: 90vh;
+        max-height: 90vh;
+        border-left: none;
+        border-top: 2px solid var(--border-color);
+        border-radius: 16px 16px 0 0;
+        transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #sidebar.open {
+        bottom: 0;
+    }
+
+    #sidebar-content {
+        padding: 16px;
+        overflow-y: auto;
+        max-height: calc(90vh - 32px);
+    }
+
+    /* Larger touch targets */
+    .btn {
+        min-height: 44px;
+        font-size: 15px;
+    }
+
+    .btn-small {
+        min-height: 40px;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    .close-btn {
+        font-size: 32px;
+        min-width: 44px;
+        min-height: 44px;
+        top: 12px;
+        right: 12px;
+    }
+
+    /* Form inputs */
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 12px 14px;
+    }
+
+    /* List items */
+    .link-item,
+    .file-item {
+        padding: 14px 16px;
+    }
+
+    /* Info banner */
+    .info-banner {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        top: 60px;
+    }
+
+    /* Dev mode indicator */
+    .dev-mode-indicator {
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+        max-width: none;
+    }
+
+    /* Content wrapper */
+    #content-wrapper {
+        top: 48px;
+    }
+
+    /* Adjust button group for mobile */
+    .button-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .button-group .btn {
+        width: 100% !important;
+        flex: none !important;
+    }
+}
+
+/* Landscape mobile phones */
+@media (max-width: 767px) and (orientation: landscape) {
+    .toolbar {
+        height: 44px;
+    }
+
+    #content-wrapper {
+        top: 44px;
+    }
+
+    #sidebar {
+        height: 95vh;
+        max-height: 95vh;
+    }
+
+    .info-banner,
+    .dev-mode-indicator {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .dev-mode-header strong {
+        font-size: 13px;
+    }
+}
+
+/* Prevent text selection on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    #svg-wrapper svg {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+
+    .toolbar,
+    .sidebar-header,
+    .section-title {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}

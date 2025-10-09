@@ -2,7 +2,7 @@
 
 A professional, corporate-grade interactive web viewer for workflow diagrams. Built with pure HTML/CSS/JavaScript - no build process required.
 
-![Version](https://img.shields.io/badge/version-1.3.2-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🚀 Live Demo
@@ -40,7 +40,8 @@ A professional, corporate-grade interactive web viewer for workflow diagrams. Bu
 - ✅ **Auto-Save** - All changes persist to browser localStorage
 - ✅ **Keyboard Shortcuts** - Quick navigation and control
 - ✅ **Polish UI** - Fully translated interface
-- ✅ **Responsive Design** - Works on desktop and tablet
+- ✅ **Fully Responsive** - Optimized for mobile, tablet, and desktop
+- ✅ **Touch Support** - Native touch gestures including pinch-to-zoom
 - ✅ **No Build Required** - Pure HTML/CSS/JS, ready to deploy
 - ✅ **GitHub Pages Ready** - Deploy in seconds
 
@@ -323,7 +324,36 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and detailed changes.
 
 ---
 
-**Current Version**: v1.3.2 | **Last Updated**: 2025-10-09
+**Current Version**: v1.4.0 | **Last Updated**: 2025-10-09
+
+## 🎨 New in v1.4.0
+
+- 📱 **Full Mobile Responsiveness** - Complete mobile and tablet support
+  - Responsive breakpoints: Mobile (< 768px), Tablet (768-1024px), Desktop (> 1024px)
+  - Full-width sidebar slides from bottom on mobile (90vh height)
+  - Compact toolbar with icon-only buttons on mobile
+  - Touch-friendly controls (min 44x44px tap targets)
+  - Landscape orientation optimizations
+- 👆 **Touch Support** - Native touch interactions
+  - Touch highlighting for nodes with visual feedback
+  - Pinch-to-zoom gesture support
+  - Touch-enabled minimap viewport dragging
+  - Smooth touch pan and zoom
+  - Prevents text selection on touch devices
+- ✨ **Enhanced Node Highlighting** - Improved visibility
+  - Multi-layered approach: opacity + glow + outline
+  - Separate hover, active, and selected states
+  - Optimized for both light and dark modes
+  - Touch-responsive with :active state
+- 🐛 **Critical Bug Fixes**
+  - Fixed sidebar close button (removed duplicate "Zamknij" button)
+  - Fixed dark mode white backgrounds in SVG and minimap
+  - Improved minimap positioning and touch handling
+- 📱 **Mobile-Specific Optimizations**
+  - Minimap hidden on mobile (< 768px) for cleaner UI
+  - Larger form inputs (16px font) to prevent iOS zoom
+  - Bottom-sheet sidebar for easier thumb access
+  - Optimized spacing and padding for small screens
 
 ## 🎨 New in v1.3.2
 
