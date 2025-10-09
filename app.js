@@ -1,6 +1,6 @@
 /**
  * Interactive Workflow Diagram - Application Logic
- * Version: 1.5.1 (Final Polish & Bug Fixes)
+ * Version: 1.5.2 (Mobile UX Improvements)
  */
 
 // ================================================
